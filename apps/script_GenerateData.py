@@ -5,7 +5,7 @@ from matplotlib.pyplot import figure
 from config import *
 
 fg_export = True  ### write results on the disk (True) or only solve (False)
-config['export_vtk'] = True
+config['export_vtk'] = False
 
 
 """
@@ -41,8 +41,11 @@ if config['two_kernels']:
     parameters = [parameters1, parameters2]
 
 else:
-    alpha = 0.7
-    RA = RationalApproximation(alpha=alpha)
+    alpha = 0.5
+    tau_eps = .2
+    tau_sig = .1
+    TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha)/(x**-alpha + 1/tau_sig)
+    RA = RationalApproximation(alpha=alpha, TargetFunction=TargetFunction)
     parameters = list(RA.c) + list(RA.d)
     if infmode==True: parameters.append(RA.c_inf)
     kernel  = SumOfExponentialsKernel(parameters=parameters)

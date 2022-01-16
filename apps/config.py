@@ -26,7 +26,7 @@ inputfolder  = "./workfolder/"
 outputfolder = "./workfolder/"
 
 ### Beam
-mesh = BoxMesh(Point(0., 0., 0.), Point(1., 0.1, 0.04), 60, 10, 5)
+mesh = BoxMesh(Point(0., 0., 0.), Point(1., 0.1, 0.04), 20, 4, 2)
 
 ### Sub domain for clamp at left end
 def DirichletBoundary(x, on_boundary):
@@ -37,7 +37,7 @@ def NeumannBoundary(x, on_boundary):
     return near(x[0], 1.) and on_boundary
 
 ### loading (depending on t)
-cutoff_time    = 4/5
+cutoff_time    = 1.
 magnitude      = 1.
 load_Bending   = Expression(("0", "t <= tc ? p0*t/tc : 0", "0"), t=0, tc=cutoff_time, p0=magnitude, degree=0) ### Bending
 magnitude      = 1.e2
@@ -50,13 +50,13 @@ config = {
     'outputfolder'      :   outputfolder,
     'export_vtk'        :   False,
 
-    'FinalTime'         :   4,
+    'FinalTime'         :   5,
     'nTimeSteps'        :   100,
 
     'mesh'              :   mesh,
     'DirichletBoundary' :   DirichletBoundary,
     'NeumannBoundary'   :   NeumannBoundary,
-    'loading'           :   [load_Bending, load_Extension], ###  load_Bending, [load_Bending, load_Extension]
+    'loading'           :   [load_Bending],#, load_Extension], ###  load_Bending, [load_Bending, load_Extension]
 
     'infmode'           :   True,
 
@@ -67,13 +67,14 @@ config = {
 
     ### Viscous term
     'viscosity'         :   True,
-    'two_kernels'       :   True,
+    'two_kernels'       :   False,
 
     ### Measurements
     'observer'          :   TipDisplacementObserver,
     'noise_level'       :   2, ### [%]
 
     ### Optimization
+    "init_fractional"   :   {"alpha" : 0.7, "tol" : 1.e-4 },
     'optimizer'         :   torch.optim.LBFGS, ### E.g., torch.optim.SGD, torch.optim.LBFGS (recommended), ...
     'max_iter'          :   100,
     'tol'               :   1.e-4,

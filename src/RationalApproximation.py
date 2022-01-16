@@ -131,7 +131,7 @@ class RationalApproximation_AAA(BasicRationalApproximation):
     def set_Support(self, **kwargs):
 
         ### TARGET FUNCTION !!!
-        self.target_func = lambda x: x**self.alpha
+        self.target_func = kwargs.get("TargetFunction", lambda x: x**self.alpha)
 
         ### Support points
         if  'SupportPoints' in kwargs.keys():
