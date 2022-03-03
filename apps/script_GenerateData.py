@@ -7,6 +7,7 @@ from config import *
 fg_export = True  ### write results on the disk (True) or only solve (False)
 config['export_vtk'] = False
 
+zener_kernel = True
 
 """
 ==================================================================================================================
@@ -41,15 +42,27 @@ if config['two_kernels']:
     parameters = [parameters1, parameters2]
 
 else:
-    alpha = 0.5
-    tau_eps = .2
-    tau_sig = .1
-    TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha)/(x**-alpha + 1/tau_sig)
-    RA = RationalApproximation(alpha=alpha, TargetFunction=TargetFunction)
-    parameters = list(RA.c) + list(RA.d)
-    if infmode==True: parameters.append(RA.c_inf)
-    kernel  = SumOfExponentialsKernel(parameters=parameters)
-    kernels = [kernel]
+    if zener_kernel:
+        alpha = 0.5
+        tau_eps = .2
+        tau_sig = .1
+        TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha)/(x**-alpha + 1/tau_sig)
+        RA = RationalApproximation(alpha=alpha, TargetFunction=TargetFunction)
+        parameters = list(RA.c) + list(RA.d)
+        if infmode==True: parameters.append(RA.c_inf)
+        kernel  = SumOfExponentialsKernel(parameters=parameters)
+        kernels = [kernel]
+    else:
+        alpha2 = 0.7
+        RA = RationalApproximation(alpha=alpha2)
+        parameters = list(RA.c) + list(RA.d)
+        if infmode==True: parameters.append(RA.c_inf)
+        # parameters2 = np.array([ 0.32337598,  0.41615834,  0.47182692,  1.03023015,  0.24184555,
+        #     0.85714041, -0.11852263,  3.39125769,  0.10000886,  0.26773023,
+        #     0.12313697,  0.70114342,  1.4451129 ,  3.89811345, 10.0704782 ,
+        #    29.40964287])**2
+        kernel = SumOfExponentialsKernel(parameters=parameters)
+        kernels = [kernel]
 
 
 
