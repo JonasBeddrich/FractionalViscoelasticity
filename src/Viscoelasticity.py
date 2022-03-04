@@ -89,6 +89,8 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         if observer:
             self.observer = observer(Model=self)
 
+        self.initialize_state()
+
 
     ### Set the kernels
     def set_kernels(self, **kwargs):
@@ -342,7 +344,7 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         if loading is not None:
             self.set_load(loading=loading)
 
-        self.initialize_state()
+        #self.initialize_state()
 
         for (i, t) in tqdm(enumerate(self.time_steps), total=self.time_steps.size):
 

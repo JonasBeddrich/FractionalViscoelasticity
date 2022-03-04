@@ -175,12 +175,14 @@ class InverseProblem:
             def Forward():
                 obs = torch.tensor([])
                 for loading_instance in loading:
+                    Model.initialize_state()
                     Model.forward_solve(loading=loading_instance)
                     obs = torch.cat([obs, Model.observations], dim=-1)
                 return obs
         else:
             def Forward():
                 Model.forward_solve()
+                Model.initialize_state()
                 obs = Model.observations
                 return obs
 
