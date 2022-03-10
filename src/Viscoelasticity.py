@@ -237,6 +237,7 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         self.w_func = Function(self.V, name="axilary variable")
         self.H_func = Function(self.V, name="hisory term")
         self.p_func = Function(self.V, name="loading")
+        self.mode_func = Function(self.V, name="modes for energy")
 
         self.u = torch.zeros(self.u_func.vector().get_local().shape, requires_grad=True).double()
         self.v = torch.zeros_like(self.u, requires_grad=True)
@@ -251,7 +252,15 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         self.observations   = []
         self.Energy_elastic = np.array([])
         self.Energy_kinetic = np.array([])
+        self.Energy_viscous = np.array([])
 
+        # initialize arrays for storing norm of modes and displacement
+        nmodes = sum([kernel.nModes for kernel in self.kernels])
+        nsteps = self.time_steps.size
+        self.modes_norm          = np.zeros((nsteps, nmodes))
+        self.displacement_norm  = np.zeros(nsteps)
+        self.velocity_norm      = np.zeros(nsteps)
+        self.acceleration_norm      = np.zeros(nsteps)
 
     def update_forces(self, time):
         if self.NeumannBC:
@@ -320,7 +329,7 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
     ==================================================================================================================
     """
 
-    def user_defined_routines(self, time=None):
+    def user_defined_routines(self, time=None, step_index=None):
 
         ### TODO: your code here
 
@@ -331,6 +340,21 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
             self.Energy_elastic = np.append(self.Energy_elastic, E_elas)
             self.Energy_kinetic = np.append(self.Energy_kinetic, E_kin)
 
+            # viscous energy and norm of modes
+            E_visc = 0
+            for kernel in self.kernels:
+                for i in range(kernel.nModes):
+
+                    mode = kernel.modes[:,i]
+                    self.mode_func.vector()[:] = mode.detach().numpy()
+
+                    self.modes_norm[step_index, i] = kernel.wk[i] * kernel.coef_bk[i] * np.sqrt(assemble(inner(self.mode_func, self.mode_func)*dx))
+                    E_visc += kernel.wk[i] * kernel.coef_bk[i] * assemble(0.5*self.c(self.mode_func, self.mode_func))
+
+            self.Energy_viscous = np.append(self.Energy_viscous, E_visc)
+            self.displacement_norm[step_index] = np.sqrt(assemble(inner(self.u_func, self.u_func)*dx))
+            self.velocity_norm[step_index] = np.sqrt(assemble(inner(self.v_func, self.v_func)*dx))
+            self.acceleration_norm[step_index] = np.sqrt(assemble(inner(self.a_func, self.a_func)*dx))
 
 
     """
@@ -356,7 +380,7 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
             self.export_state(t)
 
             self.observe()
-            self.user_defined_routines(t)
+            self.user_defined_routines(t, i)
             
 
         self.observations = torch.stack(self.observations)

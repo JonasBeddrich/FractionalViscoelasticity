@@ -22,6 +22,18 @@ def save_data(filename, model, other=[]): ### filename = full/relative path w/o 
         print("Object data is saved to {0:s}".format(filename))
 
 
+def save_data_modes(filename, model):
+    if not filename.endswith('.pkl'):
+        filename = filename + '.pkl'
+
+    with open(filename, 'wb') as filehandler:
+        data = list(pick_mode_data(model))
+        pickle.dump(data, filehandler)
+
+    if model.flags['verbose']:
+        print("Modes data is saved to {0:s}".format(filename))
+
+
 def load_data(filename):
     if not filename.endswith('.pkl'):
         filename = filename + '.pkl'
@@ -50,3 +62,10 @@ def pick_model_data(model):
     yield model.observations
     yield model.Energy_elastic
     yield model.Energy_kinetic
+    yield model.Energy_viscous
+
+def pick_mode_data(model):
+    yield model.displacement_norm
+    yield model.velocity_norm
+    yield model.acceleration_norm
+    yield model.modes_norm

@@ -10,9 +10,9 @@ tikz_folder = config['outputfolder']
 Load data
 ==================================================================================================================
 """
-tip_init, EnergyElastic_init, EnergyKinetic_init, theta_init                        = load_data(config['inputfolder']+"initial_model")
-tip_pred, EnergyElastic_pred, EnergyKinetic_pred, theta_pred, convergence_history   = load_data(config['inputfolder']+"inferred_model")
-tip_true, EnergyElastic_true, EnergyKinetic_true, theta_true                        = load_data(config['inputfolder']+"target_model")
+tip_init, EnergyElastic_init, EnergyKinetic_init, EnergyViscous_init, theta_init                        = load_data(config['inputfolder']+"initial_model")
+tip_pred, EnergyElastic_pred, EnergyKinetic_pred, EnergyViscous_pred, theta_pred, convergence_history   = load_data(config['inputfolder']+"inferred_model")
+tip_true, EnergyElastic_true, EnergyKinetic_true, EnergyViscous_true, theta_true                        = load_data(config['inputfolder']+"target_model")
 EnergyTotal_pred = EnergyElastic_pred + EnergyKinetic_pred
 EnergyTotal_true = EnergyElastic_true + EnergyKinetic_true
 

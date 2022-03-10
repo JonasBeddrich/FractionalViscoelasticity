@@ -13,7 +13,7 @@ from src.Observers import TipDisplacementObserver
 from src.Objectives import MSE
 from src.Regularization import myRegularizationTerm as reg
 from src.RationalApproximation import RationalApproximation_AAA as RationalApproximation
-from src.data_manager import save_data, load_data
+from src.data_manager import save_data, save_data_modes, load_data
 
 
 """
@@ -37,11 +37,22 @@ def NeumannBoundary(x, on_boundary):
     return near(x[0], 1.) and on_boundary
 
 ### loading (depending on t)
-cutoff_time    = 1.
-magnitude      = 1.
-load_Bending   = Expression(("0", "t <= tc ? p0*t/tc : 0", "0"), t=0, tc=cutoff_time, p0=magnitude, degree=0) ### Bending
+continuous_loading = True
+
+cutoff_time = 1.
+magnitude   = 1.
+tmax        = 4/5
+tzero       = 1.
+if continuous_loading:
+    load_Bending = Expression(("0", "t <= tm ? p0*t/tm : (t <= tz ? p0*(1 - (t-tm)/(tz-tm)) : 0)", "0"), t=0, tm=tmax, tz=tzero, p0=magnitude, degree=0) ### Bending
+else:
+    load_Bending   = Expression(("0", "t <= tc ? p0*t/tc : 0", "0"), t=0, tc=cutoff_time, p0=magnitude, degree=0) ### Bending
+
 magnitude      = 1.e2
-load_Extension = Expression(("t <= tc ? p0*t/tc : 0", "0", "0"), t=0, tc=cutoff_time, p0=magnitude, degree=0) ### Extension
+if continuous_loading:
+    load_Bending = Expression(("0", "t <= tm ? p0*t/tm : (t <= tz ? p0*(1 - (t-tm)/(tz-tm)) : 0)", "0"), t=0, tm=tmax, tz=tzero, p0=magnitude, degree=0) ### Extension
+else:
+    load_Extension = Expression(("t <= tc ? p0*t/tc : 0", "0", "0"), t=0, tc=cutoff_time, p0=magnitude, degree=0) ### Extension
 
 
 config = {

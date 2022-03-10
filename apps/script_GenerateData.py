@@ -7,7 +7,7 @@ from config import *
 fg_export = True  ### write results on the disk (True) or only solve (False)
 config['export_vtk'] = False
 
-zener_kernel = True
+zener_kernel = False
 
 """
 ==================================================================================================================
@@ -53,8 +53,8 @@ else:
         kernel  = SumOfExponentialsKernel(parameters=parameters)
         kernels = [kernel]
     else:
-        alpha2 = 0.7
-        RA = RationalApproximation(alpha=alpha2)
+        alpha = 0.7
+        RA = RationalApproximation(alpha=alpha, tol=1.e-4)
         parameters = list(RA.c) + list(RA.d)
         if infmode==True: parameters.append(RA.c_inf)
         # parameters2 = np.array([ 0.32337598,  0.41615834,  0.47182692,  1.03023015,  0.24184555,
@@ -102,6 +102,7 @@ if fg_export: ### write data to file
     # data = model.observations.numpy()
     np.savetxt(config['outputfolder']+"data_tip_displacement.csv", data)
     save_data(config['outputfolder']+"target_model", Model, other=[parameters])
+    save_data_modes(config['outputfolder']+"modes", Model)
 
     # np.savetxt(config['outputfolder']+"tip_displacement_init.csv", data)
     # save_data(config['outputfolder']+"initial_model", Model, other=[parameters])
