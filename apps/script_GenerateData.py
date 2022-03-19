@@ -7,8 +7,6 @@ from config import *
 fg_export = True  ### write results on the disk (True) or only solve (False)
 config['export_vtk'] = False
 
-zener_kernel = True
-
 """
 ==================================================================================================================
 Kernel and its rational approximation
@@ -16,6 +14,7 @@ Kernel and its rational approximation
 """
 
 infmode = config.get('infmode', False)
+zener_kernel = config.get('zener_kernel', False)
 
 if config['two_kernels']:
     if zener_kernel:

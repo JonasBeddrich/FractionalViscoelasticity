@@ -15,8 +15,6 @@ tzero = 1.
 load_Bending = Expression(("0", "t <= tm ? p0*t/tm : (t <= tz ? p0*(1 - (t-tm)/(tz-tm)) : 0)", "0"), t=0, tm=tmax, tz=tzero, p0=magnitude, degree=0)
 config['loading'] = load_Bending
 
-zener_kernel = False
-
 """
 ==================================================================================================================
 Kernel and its rational approximation
@@ -24,9 +22,9 @@ Kernel and its rational approximation
 """
 
 infmode = config.get('infmode', False)
+config['two_kernels']==False
+zener_kernel = config.get('zener_kernel', False)
 
-assert config['two_kernels']==False
-   
 if zener_kernel:
     alpha = 0.5
     tau_eps = .2

@@ -48,7 +48,7 @@ if continuous_loading:
 else:
     load_Bending   = Expression(("0", "t <= tc ? p0*t/tc : 0", "0"), t=0, tc=cutoff_time, p0=magnitude, degree=0) ### Bending
 
-magnitude = 1.e3
+magnitude = 1.e2
 if continuous_loading:
     load_Extension = Expression(("t <= tm ? p0*t/tm : (t <= tz ? p0*(1 - (t-tm)/(tz-tm)) : 0)", "0", "0"), t=0, tm=tmax, tz=tzero, p0=magnitude, degree=0) ### Extension
 else:
@@ -70,6 +70,7 @@ config = {
     'loading'           :   [load_Bending, load_Extension], ###  load_Bending, [load_Bending, load_Extension]
 
     'infmode'           :   True,
+    'zener_kernel'      :   True,
 
     ### Material parameters
     'Young'             :   1.e3,
