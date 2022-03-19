@@ -48,9 +48,9 @@ if continuous_loading:
 else:
     load_Bending   = Expression(("0", "t <= tc ? p0*t/tc : 0", "0"), t=0, tc=cutoff_time, p0=magnitude, degree=0) ### Bending
 
-magnitude      = 1.e2
+magnitude = 1.e3
 if continuous_loading:
-    load_Bending = Expression(("0", "t <= tm ? p0*t/tm : (t <= tz ? p0*(1 - (t-tm)/(tz-tm)) : 0)", "0"), t=0, tm=tmax, tz=tzero, p0=magnitude, degree=0) ### Extension
+    load_Extension = Expression(("t <= tm ? p0*t/tm : (t <= tz ? p0*(1 - (t-tm)/(tz-tm)) : 0)", "0", "0"), t=0, tm=tmax, tz=tzero, p0=magnitude, degree=0) ### Extension
 else:
     load_Extension = Expression(("t <= tc ? p0*t/tc : 0", "0", "0"), t=0, tc=cutoff_time, p0=magnitude, degree=0) ### Extension
 
@@ -67,7 +67,7 @@ config = {
     'mesh'              :   mesh,
     'DirichletBoundary' :   DirichletBoundary,
     'NeumannBoundary'   :   NeumannBoundary,
-    'loading'           :   [load_Bending],#, load_Extension], ###  load_Bending, [load_Bending, load_Extension]
+    'loading'           :   [load_Bending, load_Extension], ###  load_Bending, [load_Bending, load_Extension]
 
     'infmode'           :   True,
 
@@ -78,7 +78,7 @@ config = {
 
     ### Viscous term
     'viscosity'         :   True,
-    'two_kernels'       :   False,
+    'two_kernels'       :   True,
 
     ### Measurements
     'observer'          :   TipDisplacementObserver,
@@ -92,4 +92,5 @@ config = {
     'regularization'    :   None,  ### your regularization function, e.g., "reg", or None/False for no regularization
     'initial_guess'     :   None,  ### initial guess for parameters calibration: (weights, exponents)
     'line_search_fn'    :   'strong_wolfe', ### None, 'strong_wolfe',
+    'exclude_loading'   :   True,
 }

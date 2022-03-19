@@ -34,13 +34,14 @@ data_true = np.loadtxt(config['inputfolder']+"data_tip_displacement.csv")
 data = data_true.copy()
 
 if exclude_loading:
-    # currently only supported for one kernel
-    assert config['two_kernels'] == False
-
-    T, nsteps = config['FinalTime'], config['nTimeSteps']
     
+    T, nsteps = config['FinalTime'], config['nTimeSteps']
     steps_per_unit = nsteps // T
-    data = data[steps_per_unit:3*steps_per_unit]
+
+    if config['two_kernels']:
+        data = data[steps_per_unit:3*steps_per_unit, :]
+    else:
+        data = data[steps_per_unit:3*steps_per_unit]
 
     config['nTimeSteps'] = 3*steps_per_unit
     config['FinalTime']  = 3

@@ -368,7 +368,8 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         if loading is not None:
             self.set_load(loading=loading)
 
-        #self.initialize_state()
+        if self.flags['unique_kernel'] == False:
+            self.initialize_state()
 
         for (i, t) in tqdm(enumerate(self.time_steps), total=self.time_steps.size):
 

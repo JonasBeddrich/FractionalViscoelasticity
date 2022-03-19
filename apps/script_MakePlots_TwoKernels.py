@@ -24,6 +24,8 @@ tip_pred = np.loadtxt(config['inputfolder']+"tip_displacement_pred.csv")
 
 time_steps = np.linspace(0, config['FinalTime'], config['nTimeSteps']+1)[1:]
 time_steps_meas = time_steps[:tip_meas.shape[0]]
+if config['exclude_loading']:
+    time_steps_meas = time_steps_meas + 1
 
 tip_true_tr, tip_true_dev = tip_true[...,0], tip_true[...,1]
 tip_meas_tr, tip_meas_dev = tip_meas[...,0], tip_meas[...,1]
@@ -105,6 +107,9 @@ with torch.no_grad():
     Figure 1: Observations
     ==================================================================================================================
     """
+
+
+
     plt.figure('Tip displacement (tr)', **figure_settings)
     # plt.title('Tip displacement')
     plt.plot(time_steps, tip_init_tr, "-",  color="gray", label="initial", **plot_settings)

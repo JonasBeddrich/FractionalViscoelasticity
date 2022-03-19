@@ -7,7 +7,7 @@ from config import *
 fg_export = True  ### write results on the disk (True) or only solve (False)
 config['export_vtk'] = False
 
-zener_kernel = False
+zener_kernel = True
 
 """
 ==================================================================================================================
@@ -18,25 +18,36 @@ Kernel and its rational approximation
 infmode = config.get('infmode', False)
 
 if config['two_kernels']:
-    alpha1 = 0.9
-    RA = RationalApproximation(alpha=alpha1)
-    parameters1 = list(RA.c) + list(RA.d)
-    if infmode==True: parameters1.append(RA.c_inf)
-    # parameters1 = np.array([2.79058303e-02, 3.84100129e-02, 5.89650116e-02, 3.37202484e-02,
-    #    3.40912830e-01, 1.28161585e+00, 2.23960854e+00, 4.80126425e+00,
-    #    3.68392812e-02, 1.32895882e-01, 2.93308726e-01, 6.40031339e-01,
-    #    2.13387389e+00, 3.90843676e+00, 9.89557763e+00, 2.92032700e+01])**2
-    kernel1 = SumOfExponentialsKernel(parameters=parameters1)
+    if zener_kernel:
+        tau_eps = .2
+        tau_sig = .1
+        
+        alpha1 = 0.2
+        TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha1)/(x**-alpha1 + 1/tau_sig)
+        RA = RationalApproximation(alpha=alpha1, TargetFunction=TargetFunction)
+        parameters1 = list(RA.c) + list(RA.d)
+        if infmode==True: parameters1.append(RA.c_inf)
+        kernel1  = SumOfExponentialsKernel(parameters=parameters1)
 
-    alpha2 = 0.7
-    RA = RationalApproximation(alpha=alpha2)
-    parameters2 = list(RA.c) + list(RA.d)
-    if infmode==True: parameters2.append(RA.c_inf)
-    # parameters2 = np.array([ 0.32337598,  0.41615834,  0.47182692,  1.03023015,  0.24184555,
-    #     0.85714041, -0.11852263,  3.39125769,  0.10000886,  0.26773023,
-    #     0.12313697,  0.70114342,  1.4451129 ,  3.89811345, 10.0704782 ,
-    #    29.40964287])**2
-    kernel2 = SumOfExponentialsKernel(parameters=parameters2)
+        alpha2 = 0.5
+        TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha2)/(x**-alpha2 + 1/tau_sig)
+        RA = RationalApproximation(alpha=alpha2, TargetFunction=TargetFunction)
+        parameters2 = list(RA.c) + list(RA.d)
+        if infmode==True: parameters2.append(RA.c_inf)
+        kernel2  = SumOfExponentialsKernel(parameters=parameters2)
+
+    else:
+        alpha1 = 0.9
+        RA = RationalApproximation(alpha=alpha1)
+        parameters1 = list(RA.c) + list(RA.d)
+        if infmode==True: parameters1.append(RA.c_inf)
+        kernel1 = SumOfExponentialsKernel(parameters=parameters1)
+    
+        alpha2 = 0.7
+        RA = RationalApproximation(alpha=alpha2)
+        parameters2 = list(RA.c) + list(RA.d)
+        if infmode==True: parameters2.append(RA.c_inf)
+        kernel2 = SumOfExponentialsKernel(parameters=parameters2)
 
     kernels    = [kernel1, kernel2]
     parameters = [parameters1, parameters2]
@@ -57,10 +68,6 @@ else:
         RA = RationalApproximation(alpha=alpha, tol=1.e-4)
         parameters = list(RA.c) + list(RA.d)
         if infmode==True: parameters.append(RA.c_inf)
-        # parameters2 = np.array([ 0.32337598,  0.41615834,  0.47182692,  1.03023015,  0.24184555,
-        #     0.85714041, -0.11852263,  3.39125769,  0.10000886,  0.26773023,
-        #     0.12313697,  0.70114342,  1.4451129 ,  3.89811345, 10.0704782 ,
-        #    29.40964287])**2
         kernel = SumOfExponentialsKernel(parameters=parameters)
         kernels = [kernel]
 
