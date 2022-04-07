@@ -47,8 +47,9 @@ legend_settings = {
 }
 
 tikz_settings = {
-    'axis_width'  :   '\\textwidth',
-    'axis_height'      :   '.5\\textwidth'
+    'axis_width'    :   '\\textwidth',
+    'axis_height'   :   '.5\\textwidth',
+    'standalone'    :   True,
 }
 
 with torch.no_grad():
@@ -69,7 +70,7 @@ with torch.no_grad():
     velocity_norm     *= maxnorm*1.1/np.max(velocity_norm)
     acceleration_norm *= maxnorm*1.1/np.max(acceleration_norm)
 
-    plt.figure('Norm of modes and solution', **figure_settings)
+    fig = plt.figure('Norm of modes and solution', **figure_settings)
     plt.plot(time_steps, modes_norm, "-", **plot_settings)
     plt.plot(time_steps, displacement_norm, ":",  color="k", **plot_settings)
     plt.plot(time_steps, velocity_norm, "--",  color="k", **plot_settings)
@@ -79,6 +80,7 @@ with torch.no_grad():
     plt.ylabel(r"Norm")
     plt.xlabel(r"$t$")
     plt.xlim([0, 4])
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_modes_norm.tex", **tikz_settings)
     plt.show()
 

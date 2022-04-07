@@ -141,7 +141,7 @@ matplotlib.rc('font', **font)
 figure_settings = {'figsize' : (10,6)}
 plot_settings = {'markersize' : 2}
 legend_settings = {'loc' : 'center left', 'bbox_to_anchor' : (1.1, 0.5)}
-tikz_settings = {'axis_width' : '\\textwidth'}
+tikz_settings = {'axis_width' : '\\textwidth', 'standalone' : True}
 
 style_colors = matplotlib.rcParams['axes.prop_cycle']
 style_colors = [color for color in style_colors]
@@ -149,7 +149,7 @@ color1 = style_colors[0]['color']
 color2 = style_colors[1]['color']
 
 with torch.no_grad():
-    plt.figure('Tip displacement', **figure_settings)
+    fig = plt.figure('Tip displacement', **figure_settings)
     plt.plot(IC.time_steps, IC.observations.numpy(), label="Initial Condition", **plot_settings, color="k", zorder=10)
     plt.plot(IC.time_steps, IC.velocity_norm, **plot_settings, color="k", linestyle="--", zorder=10)
     plt.plot(IC.time_steps, IC.acceleration_norm, **plot_settings, color="k", linestyle=":", zorder=10)
@@ -172,10 +172,11 @@ with torch.no_grad():
     plt.ylabel(r"Tip displacement")
     plt.xlabel(r"$t$")
 
+    #tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_ic_displacement.tex", **tikz_settings)
     plt.show()
 
-    plt.figure('Tip displacement', **figure_settings)
+    fig = plt.figure('Tip displacement', **figure_settings)
     plt.plot(IC.time_steps, IC.modes_norm, **plot_settings, color="k", zorder=10)
 
     tmp = IC.modes_norm[-1, :]
@@ -193,6 +194,7 @@ with torch.no_grad():
     plt.plot([1], [0], color="k", label="Initial Condition", zorder=-10)
     plt.legend()
 
+    #tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_ic_modes.tex", **tikz_settings)
     plt.show()
 

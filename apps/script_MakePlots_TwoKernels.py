@@ -96,6 +96,7 @@ legend_settings = {
 
 tikz_settings = {
     'axis_width'  :   '\\textwidth',
+    'standalone'  :   True,
 }
 
 
@@ -110,7 +111,7 @@ with torch.no_grad():
 
 
 
-    plt.figure('Tip displacement (tr)', **figure_settings)
+    fig = plt.figure('Tip displacement (tr)', **figure_settings)
     # plt.title('Tip displacement')
     plt.plot(time_steps, tip_init_tr, "-",  color="gray", label="initial", **plot_settings)
     plt.plot(time_steps, tip_pred_tr, "r-",  label="predict", **plot_settings)
@@ -120,11 +121,12 @@ with torch.no_grad():
     plt.ylabel(r"Tip displacement")
     plt.xlabel(r"$t$")
     plt.gca().yaxis.set_major_formatter(matplotlib.ticker.StrMethodFormatter('{x:,.2f}')) # 2 decimal places
-
+    
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_two_kernels_tip_displacement_bending.tex", **tikz_settings)
 
 
-    plt.figure('Tip displacement (dev)', **figure_settings)
+    fig = plt.figure('Tip displacement (dev)', **figure_settings)
     # plt.title('Tip displacement')
     plt.plot(time_steps, tip_init_dev, "-",  color="gray", label="initial", **plot_settings)
     plt.plot(time_steps, tip_pred_dev, "r-",  label="predict", **plot_settings)
@@ -134,6 +136,7 @@ with torch.no_grad():
     plt.ylabel(r"Tip displacement")
     plt.xlabel(r"$t$")
 
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_two_kernels_tip_displacement_extension.tex", **tikz_settings)
 
 
@@ -167,7 +170,7 @@ with torch.no_grad():
     Figure 3: Kernels
     ==================================================================================================================
     """
-    plt.figure('Kernels (tr)', **figure_settings)
+    fig = plt.figure('Kernels (tr)', **figure_settings)
     # plt.title('Kernels')
     t = np.geomspace(0.04, 2, 100)
     plt.plot(t, kernel_init.eval_func(t), "-", color="gray", label="initial guess", **plot_settings)
@@ -180,11 +183,12 @@ with torch.no_grad():
     plt.xlabel(r"$t$")
     plt.legend(**legend_settings)
 
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_two_kernels_compare_kernels_tr.tex", **tikz_settings)
 
 
 
-    plt.figure('Kernels (dev)', **figure_settings)
+    fig = plt.figure('Kernels (dev)', **figure_settings)
     # plt.title('Kernels')
     t = np.geomspace(0.04, 2, 100)
     plt.plot(t, kernel_init.eval_func(t), "-", color="gray", label="initial guess", **plot_settings)
@@ -198,6 +202,7 @@ with torch.no_grad():
     plt.xlabel(r"$t$")
     plt.legend(**legend_settings)
 
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_two_kernels_compare_kernels_dev.tex", **tikz_settings)
 
 

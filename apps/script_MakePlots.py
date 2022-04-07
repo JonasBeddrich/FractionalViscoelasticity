@@ -99,6 +99,7 @@ legend_settings = {
 
 tikz_settings = {
     'axis_width'  :   '\\textwidth',
+    'standalone'  :   True,
 }
 
 
@@ -110,7 +111,7 @@ with torch.no_grad():
     Figure 1: Observations
     ==================================================================================================================
     """
-    plt.figure('Tip displacement', **figure_settings)
+    fig = plt.figure('Tip displacement', **figure_settings)
     # plt.title('Tip displacement')
     plt.plot(time_steps, tip_init, "-",  color="gray", label="initial", **plot_settings)
     plt.plot(time_steps, tip_pred, "r-",  label="predict", **plot_settings)
@@ -120,6 +121,7 @@ with torch.no_grad():
     plt.ylabel(r"Tip displacement")
     plt.xlabel(r"$t$")
 
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_tip_displacement.tex", **tikz_settings)
 
 
@@ -128,7 +130,7 @@ with torch.no_grad():
     Figure 2: Energies
     ==================================================================================================================
     """
-    plt.figure('Energies', **figure_settings)
+    fig = plt.figure('Energies', **figure_settings)
     # plt.title('Energies')
 
     plt.plot(time_steps, EnergyElastic_pred, "-", color='red', label="Elastic energy (predict)", **plot_settings)
@@ -144,6 +146,7 @@ with torch.no_grad():
     plt.xlabel(r"$t$")
     plt.legend()
 
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_energies.tex", **tikz_settings)
 
 
@@ -153,7 +156,7 @@ with torch.no_grad():
     Figure 3: Kernels
     ==================================================================================================================
     """
-    plt.figure('Kernels', **figure_settings)
+    fig = plt.figure('Kernels', **figure_settings)
     # plt.title('Kernels')
     t = np.geomspace(0.04, 4, 100)
     plt.plot(t, kernel_init.eval_func(t), "-", color="gray", label="sum-of-exponentials (initial guess)", **plot_settings)
@@ -166,6 +169,7 @@ with torch.no_grad():
     plt.xlabel(r"$t$")
     plt.legend()
 
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_kernels.tex", **tikz_settings)
 
 
@@ -181,7 +185,7 @@ with torch.no_grad():
     #nsteps = len(parameters)
     #p = torch.stack(parameters).reshape([nsteps,2,-1]).detach().numpy()
 
-    plt.figure('Parameters convergence: Weights', **figure_settings)
+    fig = plt.figure('Parameters convergence: Weights', **figure_settings)
     # plt.title('Parameters convergence: Weights')
     for i in range(nmodes):
         plt.plot(p[:,0,i]/(1+p[:,0,i+nmodes]), label=r'$w_{{%(i)d}}$' % {'i' : i+1}, **plot_settings)
@@ -189,11 +193,12 @@ with torch.no_grad():
     plt.xlabel("Iteration")
     plt.legend()
 
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_weights_convergence.tex", **tikz_settings)
     # plt.yscale('log')
 
 
-    plt.figure('Parameters convergence: Exponents', **figure_settings)
+    fig = plt.figure('Parameters convergence: Exponents', **figure_settings)
     # plt.title('Parameters convergence: Exponents')
     for i in range(nmodes):
         plt.plot(p[:,0,i+nmodes]/(1+p[:,0,i+nmodes]), label=r'$\lambda_{{%(i)d}}$' % {'i' : i+1}, **plot_settings)
@@ -202,10 +207,11 @@ with torch.no_grad():
     plt.xlabel("Iteration")
     plt.legend()
 
+    tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_exponents_convergence.tex", **tikz_settings)
     
     if len(p)%2!=0:
-        plt.figure('Parameters convergence: Infmode', **figure_settings)
+        fig = plt.figure('Parameters convergence: Infmode', **figure_settings)
         # plt.title('Parameters convergence: Exponents')
         plt.plot(p[:,0,-1]/(1+p[:,0,-1]), **plot_settings)
         # plt.yscale('log')
@@ -213,6 +219,7 @@ with torch.no_grad():
         plt.xlabel("Iteration")
         plt.legend()
 
+        tikzplotlib.clean_figure(fig)
         tikzplotlib.save(tikz_folder+"plt_exponents_convergence.tex", **tikz_settings)
 
 
