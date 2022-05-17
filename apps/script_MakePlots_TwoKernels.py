@@ -27,10 +27,16 @@ time_steps_meas = time_steps[:tip_meas.shape[0]]
 if config['exclude_loading']:
     time_steps_meas = time_steps_meas + 1
 
-tip_true_tr, tip_true_dev = tip_true[...,0], tip_true[...,1]
-tip_meas_tr, tip_meas_dev = tip_meas[...,0], tip_meas[...,1]
-tip_init_tr, tip_init_dev = tip_init[...,0], tip_init[...,1]
-tip_pred_tr, tip_pred_dev = tip_pred[...,0], tip_pred[...,1]
+if tip_true.ndim == 2:
+    tip_true_tr, tip_true_dev = tip_true[...,0], tip_true[...,1]
+    tip_meas_tr, tip_meas_dev = tip_meas[...,0], tip_meas[...,1]
+    tip_init_tr, tip_init_dev = tip_init[...,0], tip_init[...,1]
+    tip_pred_tr, tip_pred_dev = tip_pred[...,0], tip_pred[...,1]
+else:
+    tip_true_tr, tip_true_dev = tip_true, tip_true
+    tip_meas_tr, tip_meas_dev = tip_meas, tip_meas
+    tip_init_tr, tip_init_dev = tip_init, tip_init
+    tip_pred_tr, tip_pred_dev = tip_pred, tip_pred
 
 
 

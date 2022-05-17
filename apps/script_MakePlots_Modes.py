@@ -47,8 +47,8 @@ legend_settings = {
 }
 
 tikz_settings = {
-    'axis_width'    :   '\\textwidth',
-    'axis_height'   :   '.5\\textwidth',
+    'axis_width'    :   '160mm',
+    'axis_height'   :   '80mm',
     'standalone'    :   True,
 }
 

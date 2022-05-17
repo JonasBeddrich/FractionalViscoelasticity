@@ -4,8 +4,7 @@ from config import *
 fg_export = True    ### write results on the disk (True) or only solve (False)
 
 noise_level = config['noise_level'] ### [%]
-
-exclude_loading = True
+exclude_loading = config['exclude_loading']
 
 
 """
@@ -38,7 +37,7 @@ if exclude_loading:
     T, nsteps = config['FinalTime'], config['nTimeSteps']
     steps_per_unit = nsteps // T
 
-    if config['two_kernels']:
+    if data.ndim == 2:
         data = data[steps_per_unit:3*steps_per_unit, :]
     else:
         data = data[steps_per_unit:3*steps_per_unit]
@@ -48,11 +47,12 @@ if exclude_loading:
 
 else:
     ### Optimize on a shorter interval
-    if config['two_kernels']:
-        data = data[:int(data.shape[0]//2), :]
-    else:
-        data = data[:int(data.shape[0]//2)]
     T, nsteps = config['FinalTime'], config['nTimeSteps']
+    steps_per_unit = nsteps // T
+    if data.ndim == 2:
+        data = data[:3*steps_per_unit, :]
+    else:
+        data = data[:3*steps_per_unit]
     config['nTimeSteps'] = data.shape[0]
     config['FinalTime']  = data.shape[0] * (T / nsteps)
 

@@ -64,7 +64,7 @@ else:
         kernels = [kernel]
     else:
         alpha = 0.7
-        RA = RationalApproximation(alpha=alpha, tol=1.e-4)
+        RA = RationalApproximation(alpha=alpha)
         parameters = list(RA.c) + list(RA.d)
         if infmode==True: parameters.append(RA.c_inf)
         kernel = SumOfExponentialsKernel(parameters=parameters)
