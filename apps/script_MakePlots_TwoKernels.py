@@ -101,7 +101,7 @@ legend_settings = {
 
 
 tikz_settings = {
-    'axis_width'  :   '\\textwidth',
+    'axis_width'  :   '0.45*160mm',
     'standalone'  :   True,
 }
 
