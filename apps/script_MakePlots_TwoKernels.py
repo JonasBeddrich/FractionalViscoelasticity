@@ -11,9 +11,9 @@ tikz_folder = config['outputfolder']
 Load data
 ==================================================================================================================
 """
-tip_init, EnergyElastic_init, EnergyKinetic_init, EnergyViscous_init, theta_init              = load_data(config['inputfolder']+"initial_model")
-tip_pred, EnergyElastic_pred, EnergyKinetic_pred, EnergyViscous_pred, theta_pred, convergence = load_data(config['inputfolder']+"inferred_model")
-tip_true, EnergyElastic_true, EnergyKinetic_true, EnergyViscous_true, theta_true              = load_data(config['inputfolder']+"target_model")
+tip_init, EnergyElastic_init, EnergyKinetic_init, EnergyViscous_init, theta_init                      = load_data(config['inputfolder']+"initial_model")
+tip_pred, EnergyElastic_pred, EnergyKinetic_pred, EnergyViscous_pred, theta_pred, convergence_history = load_data(config['inputfolder']+"inferred_model")
+tip_true, EnergyElastic_true, EnergyKinetic_true, EnergyViscous_true, theta_true                      = load_data(config['inputfolder']+"target_model")
 EnergyTotal_pred = EnergyElastic_pred + EnergyKinetic_pred
 EnergyTotal_true = EnergyElastic_true + EnergyKinetic_true
 
@@ -210,6 +210,28 @@ with torch.no_grad():
 
     tikzplotlib.clean_figure(fig)
     tikzplotlib.save(tikz_folder+"plt_two_kernels_compare_kernels_dev.tex", **tikz_settings)
+
+    """
+    ==================================================================================================================
+    Figure 4: Convergence
+    ==================================================================================================================
+    """
+
+    fig = plt.figure('Convergence', **figure_settings)
+
+    plt.plot(convergence_history['loss'], label="loss")
+    plt.plot(convergence_history['grad'], label="gradient")
+    # plt.plot(t, kernel_frac_init(t), "o", color="gray", label=r"fractional $\alpha=0.5$", **plot_settings)
+    # plt.plot(t, kernel_frac(t), "bo", label=r"fractional $\alpha=0.7$", **plot_settings)
+    # plt.plot(t, t**(alpha2-1)/gamma(alpha2), "bo", label=r"fractional $\alpha=0.7$", **plot_settings)
+
+    #plt.ylabel("Loss")
+    plt.yscale("log")
+    plt.xlabel("Iteration")
+    plt.legend(**legend_settings)
+
+    tikzplotlib.clean_figure(fig)
+    tikzplotlib.save(tikz_folder+"plt_two_kernels_convergence.tex", **tikz_settings)
 
 
     """
