@@ -1,7 +1,3 @@
-
-
-
-from matplotlib.pyplot import figure
 from config import *
 
 fg_export = True  ### write results on the disk (True) or only solve (False)

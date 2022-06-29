@@ -1,9 +1,11 @@
-
 from fenics import *
 from fenics_adjoint import *
 
 import torch
 import numpy as np
+
+import tikzplotlib
+import matplotlib
 import matplotlib.pyplot as plt
 
 from src.Viscoelasticity import ViscoelasticityProblem
@@ -14,6 +16,37 @@ from src.Objectives import MSE
 from src.Regularization import myRegularizationTerm as reg
 from src.RationalApproximation import RationalApproximation_AAA as RationalApproximation
 from src.data_manager import save_data, save_data_modes, load_data
+
+
+"""
+==================================================================================================================
+Plotting Defaults
+==================================================================================================================
+"""
+
+# select plot stylesheet
+plt.style.use("bmh")
+
+font = {
+    #'family' : 'normal',
+    #'weight' : 'bold',
+    'size' : 12
+    }
+matplotlib.rc('font', **font)
+
+figure_settings = {'figsize' : (10,6)}
+
+plot_settings = {
+    'markersize' : 2
+    }
+
+legend_settings = {}
+
+# full width image in paper
+tikz_settings = {
+    'axis_width' : '160mm',
+    'standalone' : True
+    }
 
 
 """

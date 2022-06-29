@@ -1,15 +1,5 @@
-from matplotlib.pyplot import figure
 from config import *
 import os
-import tikzplotlib
-import matplotlib
-
-plt.style.use("bmh")
-font = {'size' : 12}
-matplotlib.rc('font', **font)
-figure_settings = {'figsize' : (10,6)}
-plot_settings = {'markersize' : 2}
-tikz_settings = {'axis_width' : '160mm', 'axis_height' : '0.5*160mm', 'standalone' : True}
 
 folder = config['outputfolder'] + "Modes/"
 config['nTimeSteps'] = 250
@@ -88,5 +78,6 @@ for continuos_loading in [True, False]:
     plt.xlabel(r"$t$")
     plt.xlim([0, 5])
 
+    tikz_settings['axis_height'] = "0.5*160mm"
     tikzplotlib.save(plt_file, **tikz_settings)
     plt.close()

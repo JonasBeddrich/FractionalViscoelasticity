@@ -1,5 +1,3 @@
-
-
 from config import *
 
 tikz_folder = config['outputfolder']
@@ -72,37 +70,7 @@ FIGURES
 ==================================================================================================================
 """
 
-import tikzplotlib
-import matplotlib
-# plt.style.use("ggplot")
-plt.style.use("bmh")
-font = {
-    # 'family' : 'normal',
-        # 'weight' : 'bold',
-        'size'   : 12}
-matplotlib.rc('font', **font)
-
-
-figure_settings = {
-    'figsize'   :   (10,6),
-}
-
-plot_settings = {
-    'markersize'   :   2,
-}
-
-legend_settings = {
-    'loc'             :   'center left',
-    'bbox_to_anchor'  :   (1.1, 0.5),
-}
-
-
-tikz_settings = {
-    'axis_width'  :   '\\textwidth',
-    'standalone'  :   True,
-}
-
-
+tikz_settings['axis_width'] = "0.45*160mm"
 
 with torch.no_grad():
 

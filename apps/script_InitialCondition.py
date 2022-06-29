@@ -1,23 +1,11 @@
 from matplotlib.pyplot import figure
 from config import *
 import copy
-
-import tikzplotlib
-import matplotlib
 import os
     
-# Plotting settings
 tikz_folder = config['outputfolder']+'IC/'
 if not os.path.exists(tikz_folder):
     os.makedirs(tikz_folder)
-
-plt.style.use("bmh")
-font = {'size' : 12}
-matplotlib.rc('font', **font)
-figure_settings = {'figsize' : (10,6)}
-plot_settings = {'markersize' : 2}
-legend_settings = {'loc' : 'center left', 'bbox_to_anchor' : (1.1, 0.5)}
-tikz_settings = {'axis_width' : '160mm*0.45', 'standalone' : True}
 
 style_colors = matplotlib.rcParams['axes.prop_cycle']
 style_colors = [color for color in style_colors]
@@ -189,6 +177,6 @@ for alpha in [0.05, 0.5, 0.75, 0.95]:
         plt.plot([1], [0], color="k", label="initial", zorder=-10)
         plt.legend()
 
-        #tikzplotlib.clean_figure(fig)
+        tikz_settings['axis_width'] = '0.45*160mm'
         tikzplotlib.save(tikz_folder+f"plt_ic_modes_alpha{alpha}.tex", **tikz_settings)
         plt.close()
