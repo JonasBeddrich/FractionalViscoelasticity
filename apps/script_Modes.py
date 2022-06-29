@@ -55,7 +55,7 @@ for continuos_loading in run:
     if continuos_loading == True:
         file = folder + "modes_continuous_loading"
     else:
-        file = folder + "modes_discontinuos_loading"
+        file = folder + "modes_discontinuous_loading"
 
     save_data_modes(file, Model)
 
@@ -65,7 +65,7 @@ for continuos_loading in [True, False]:
         file = folder + "modes_continuous_loading"
         plt_file = folder + "plt_modes_continuous_loading.tex"
     else:
-        file = folder + "modes_discontinuos_loading"
+        file = folder + "modes_discontinuous_loading"
         plt_file = folder + "plt_modes_discontinuous_loading.tex"
     displacement, velocity, acceleration, modes = load_data(file)
 
@@ -75,6 +75,7 @@ for continuos_loading in [True, False]:
     labels = [f"mode {i+1}" for i in range(nmodes)]
     labels.append("displacement (scaled)")
     labels.append("velocity (scaled)")
+    labels.append("acceleration (scaled)")
 
     plt.figure('Norm of modes and solution', **figure_settings)
     plt.plot(time_steps, modes, "-", **plot_settings, zorder=10)
@@ -85,6 +86,7 @@ for continuos_loading in [True, False]:
     plt.legend(labels)
     plt.ylabel(r"Norm")
     plt.xlabel(r"$t$")
-    plt.xlim([0,4])
+    plt.xlim([0, 5])
+
     tikzplotlib.save(plt_file, **tikz_settings)
-    plt.show()
+    plt.close()
