@@ -9,6 +9,12 @@ Kernel and its rational approximation
 ==================================================================================================================
 """
 
+print()
+print()
+print("================================")
+print("    RATIONAL APPX OF KERNEL")
+print("================================")
+
 infmode = config.get('infmode', False)
 zener_kernel = config.get('zener_kernel', False)
 
@@ -23,6 +29,7 @@ if config['two_kernels']:
         parameters1 = list(RA.c) + list(RA.d)
         if infmode==True: parameters1.append(RA.c_inf)
         kernel1  = SumOfExponentialsKernel(parameters=parameters1)
+        print("nModes kernel 1: ", RA.nModes)
 
         alpha2 = 0.5
         TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha2)/(x**-alpha2 + 1/tau_sig)
@@ -30,6 +37,7 @@ if config['two_kernels']:
         parameters2 = list(RA.c) + list(RA.d)
         if infmode==True: parameters2.append(RA.c_inf)
         kernel2  = SumOfExponentialsKernel(parameters=parameters2)
+        print("nModes kernel 2: ", RA.nModes)
 
     else:
         alpha1 = 0.9
@@ -37,12 +45,14 @@ if config['two_kernels']:
         parameters1 = list(RA.c) + list(RA.d)
         if infmode==True: parameters1.append(RA.c_inf)
         kernel1 = SumOfExponentialsKernel(parameters=parameters1)
+        print("nModes kernel 1: ", RA.nModes)
     
         alpha2 = 0.7
         RA = RationalApproximation(alpha=alpha2)
         parameters2 = list(RA.c) + list(RA.d)
         if infmode==True: parameters2.append(RA.c_inf)
         kernel2 = SumOfExponentialsKernel(parameters=parameters2)
+        print("nModes kernel 2: ", RA.nModes)
 
     kernels    = [kernel1, kernel2]
     parameters = [parameters1, parameters2]
@@ -65,6 +75,7 @@ else:
         if infmode==True: parameters.append(RA.c_inf)
         kernel = SumOfExponentialsKernel(parameters=parameters)
         kernels = [kernel]
+    print("nModes kernel: ", RA.nModes)
 
 
 
