@@ -1,6 +1,3 @@
-from fenics import *
-from fenics_adjoint import *
-
 import torch
 import numpy as np
 
@@ -16,6 +13,9 @@ from src.Objectives import MSE
 from src.Regularization import myRegularizationTerm as reg
 from src.RationalApproximation import RationalApproximation_AAA as RationalApproximation
 from src.data_manager import save_data, save_data_modes, load_data
+
+from fenics import *
+from fenics_adjoint import *
 
 
 """
