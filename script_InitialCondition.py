@@ -1,4 +1,5 @@
-from config.imports import * 
+from config.imports import *
+from config.plot_defaults import *
 from matplotlib.pyplot import figure
 import copy
     
