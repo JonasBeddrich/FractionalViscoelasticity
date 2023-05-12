@@ -1,6 +1,16 @@
-from config import *
+import sys
+import importlib
+
+if len(sys.argv) == 1:
+    sys.argv.append("config")
+config_name = "config." + sys.argv[1]
+
+config = importlib.import_module(config_name)
+globals().update({k: getattr(config, k)
+                  for k in [x for x in config.__dict__ if not x.startswith("_")]})
 
 fg_export = True    ### write results on the disk (True) or only solve (False)
+config_initial = config.copy()
 
 noise_level = config['noise_level'] ### [%]
 exclude_loading = config['exclude_loading']
@@ -28,7 +38,16 @@ Data to fit
 ==================================================================================================================
 """
 
-data_true = np.loadtxt(config['inputfolder']+"data_tip_displacement.csv")
+# Load file with given timestamp or newest file with matching name
+if len(sys.argv) >= 3:
+    timestamp = sys.argv[2]
+    filename = config['inputfolder']+"tip_displacement_target_"+timestamp+".csv"
+else:
+    filename = max(glob.iglob(config['inputfolder']+"tip_displacement_target_*.csv"), key=os.path.getctime)
+    print(filename)
+    timestamp = filename[-17:-4]
+
+data_true = np.loadtxt(filename)
 data = data_true.copy()
 
 if exclude_loading:
@@ -59,7 +78,7 @@ else:
 scale = (noise_level/100) * np.abs(data) #.max(axis=0, keepdims=True)
 noise = np.random.normal(loc=0, scale=scale, size=data.shape) ### additive noise
 data  = data + noise
-np.savetxt(config['outputfolder']+"data_tip_displacement_noisy.csv", data)
+np.savetxt(config['outputfolder']+"tip_displacement_noisy_"+timestamp+".csv", data)
 
 
 ### Compare data
@@ -72,6 +91,48 @@ else:
 plt.legend()
 plt.show()
 
+
+
+"""
+==================================================================================================================
+Forward run of initial guess
+==================================================================================================================
+"""
+
+if fg_export:
+    print()
+    print()
+    print("================================")
+    print("       RUN INITIAL GUESS")
+    print("================================")
+
+
+    if config_initial["two_kernels"]:
+        kernels = [SumOfExponentialsKernel(**config), SumOfExponentialsKernel(**config)] ### default kernels: alpha=0.5, 8 modes
+        parameters = [kernels[0].default_parameters(), kernels[0].default_parameters()]
+    else:
+        kernels = [SumOfExponentialsKernel(**config)]
+        parameters = kernels[0].default_parameters()
+
+    model = ViscoelasticityProblem(**config_initial, kernels=kernels)
+    model.set_time_stepper(nTimeSteps=nsteps, FinalTime=T)
+    model.flags["inverse"] = False
+
+    loading = config.get("loading", None)
+    if isinstance(loading, list): ### multiple loadings case
+        obs = torch.tensor([])
+        for loading_instance in loading:
+            model.forward_solve(loading=loading_instance)
+            obs = torch.cat([obs, model.observations], dim=-1)
+        pred = obs.numpy()
+    else:
+        model.forward_solve()
+        obs = model.observations
+        pred =  obs.numpy()
+    
+    ### write data to file
+    save_data(config['outputfolder']+"model_initial_"+timestamp, model, other=[parameters])
+    np.savetxt(config['outputfolder']+"tip_displacement_initial_"+timestamp+".csv", pred)
 
 
 
@@ -137,8 +198,8 @@ else:
     pred =  obs.numpy()
 
 if fg_export: ### write data to file
-    save_data(config['outputfolder']+"inferred_model", model, other=[theta_opt, IP.convergence_history])
-    np.savetxt(config['outputfolder']+"tip_displacement_pred.csv", pred)
+    save_data(config['outputfolder']+"model_predict_"+timestamp, model, other=[theta_opt, IP.convergence_history])
+    np.savetxt(config['outputfolder']+"tip_displacement_predict_"+timestamp+".csv", pred)
 
 
 """

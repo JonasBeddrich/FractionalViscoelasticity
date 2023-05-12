@@ -1,4 +1,13 @@
-from config import *
+import sys
+import importlib
+
+if len(sys.argv) == 1:
+    sys.argv.append("config")
+config_name = "config." + sys.argv[1]
+
+config = importlib.import_module(config_name)
+globals().update({k: getattr(config, k)
+                  for k in [x for x in config.__dict__ if not x.startswith("_")]})
 
 tikz_folder = config['outputfolder']
 
@@ -8,13 +17,19 @@ tikz_folder = config['outputfolder']
 Load data
 ==================================================================================================================
 """
-tip_init, EnergyElastic_init, EnergyKinetic_init, EnergyViscous_init, theta_init                        = load_data(config['inputfolder']+"initial_model")
-tip_pred, EnergyElastic_pred, EnergyKinetic_pred, EnergyViscous_pred, theta_pred, convergence_history   = load_data(config['inputfolder']+"inferred_model")
-tip_true, EnergyElastic_true, EnergyKinetic_true, EnergyViscous_true, theta_true                        = load_data(config['inputfolder']+"target_model")
+if len(sys.argv) >= 3:
+    timestamp = sys.argv[2]
+    filename = config['inputfolder']+"tip_displacement_noisy_"+timestamp+".csv"
+else:
+    filename = min(glob.iglob(config['inputfolder']+"tip_displacement_noisy_*.csv"), key=os.path.getctime)
+    timestamp = filename[-17:-4]
+tip_meas = np.loadtxt(filename)
+
+tip_init, EnergyElastic_init, EnergyKinetic_init, EnergyViscous_init, theta_init                        = load_data(config['inputfolder']+"model_initial_"+timestamp)
+tip_pred, EnergyElastic_pred, EnergyKinetic_pred, EnergyViscous_pred, theta_pred, convergence_history   = load_data(config['inputfolder']+"model_predict_"+timestamp)
+tip_true, EnergyElastic_true, EnergyKinetic_true, EnergyViscous_true, theta_true                        = load_data(config['inputfolder']+"model_target_"+timestamp)
 EnergyTotal_pred = EnergyElastic_pred + EnergyKinetic_pred
 EnergyTotal_true = EnergyElastic_true + EnergyKinetic_true
-
-tip_meas = np.loadtxt(config['inputfolder']+"data_tip_displacement_noisy.csv")
 
 time_steps = np.linspace(0, config['FinalTime'], config['nTimeSteps']+1)[1:]
 time_steps_meas = time_steps[:tip_meas.size]
@@ -90,7 +105,7 @@ with torch.no_grad():
     plt.xlabel(r"$t$")
 
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_tip_displacement.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_tip_displacement_"+timestamp+".tex", **tikz_settings)
 
 
     """
@@ -115,7 +130,7 @@ with torch.no_grad():
     plt.legend()
 
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_energies.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_energies_"+timestamp+".tex", **tikz_settings)
 
 
 
@@ -138,7 +153,7 @@ with torch.no_grad():
     plt.legend()
 
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_kernels.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_kernels_"+timestamp+".tex", **tikz_settings)
 
 
     """
@@ -162,7 +177,7 @@ with torch.no_grad():
     plt.legend()
 
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_weights_convergence.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_weights_convergence_"+timestamp+".tex", **tikz_settings)
     # plt.yscale('log')
 
 
@@ -176,7 +191,7 @@ with torch.no_grad():
     plt.legend()
 
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_exponents_convergence.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_exponents_convergence_"+timestamp+".tex", **tikz_settings)
     
     if len(p)%2!=0:
         fig = plt.figure('Parameters convergence: Infmode', **figure_settings)
@@ -188,7 +203,7 @@ with torch.no_grad():
         plt.legend()
 
         tikzplotlib.clean_figure(fig)
-        tikzplotlib.save(tikz_folder+"plt_exponents_convergence.tex", **tikz_settings)
+        tikzplotlib.save(tikz_folder+"plt_infmode_convergence_"+timestamp+".tex", **tikz_settings)
 
 
     """

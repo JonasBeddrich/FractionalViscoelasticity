@@ -1,7 +1,15 @@
-from config import *
+import sys
+import importlib
+
+if len(sys.argv) == 1:
+    sys.argv.append("config")
+config_name = "config." + sys.argv[1]
+
+config = importlib.import_module(config_name)
+globals().update({k: getattr(config, k)
+                  for k in [x for x in config.__dict__ if not x.startswith("_")]})
 
 fg_export = True  ### write results on the disk (True) or only solve (False)
-config['export_vtk'] = False
 
 """
 ==================================================================================================================
@@ -112,18 +120,15 @@ else:
 data = Forward()
 
 if fg_export: ### write data to file
-    # data = model.observations.numpy()
-    np.savetxt(config['outputfolder']+"data_tip_displacement.csv", data)
-    save_data(config['outputfolder']+"target_model", Model, other=[parameters])
-    save_data_modes(config['outputfolder']+"modes", Model)
+    
+    if len(sys.argv) >= 3:
+        timestamp = sys.argv[2]
+    else:
+        timestamp = time.strftime("%Y%m%d-%H%M")
 
-    # np.savetxt(config['outputfolder']+"tip_displacement_init.csv", data)
-    # save_data(config['outputfolder']+"initial_model", Model, other=[parameters])
-
-
-    # np.savetxt(config['outputfolder']+"tip_displacement_pred.csv", data)
-    # save_data(config['outputfolder']+"inferred_model", Model, other=[parameters])
-
+    np.savetxt(config['outputfolder']+"tip_displacement_target_"+timestamp+".csv", data)
+    save_data(config['outputfolder']+"model_target_"+timestamp+"", Model, other=[parameters])
+    save_data_modes(config['outputfolder']+"modes_target_"+timestamp+"", Model)
 
 """
 ==================================================================================================================

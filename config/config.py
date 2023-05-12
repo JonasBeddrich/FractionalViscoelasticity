@@ -1,3 +1,7 @@
+import os
+import glob
+import time
+
 import torch
 import numpy as np
 
@@ -57,6 +61,9 @@ Problem Configuration
 
 inputfolder  = "./workfolder/"
 outputfolder = "./workfolder/"
+
+os.makedirs(inputfolder, exist_ok=True)
+os.makedirs(outputfolder, exist_ok=True)
 
 ### Beam
 mesh = BoxMesh(Point(0., 0., 0.), Point(1., 0.1, 0.04), 60, 10, 5)

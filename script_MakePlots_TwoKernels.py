@@ -1,5 +1,13 @@
-from config import *
-from math import gamma
+import sys
+import importlib
+
+if len(sys.argv) == 1:
+    sys.argv.append("config")
+config_name = "config." + sys.argv[1]
+
+config = importlib.import_module(config_name)
+globals().update({k: getattr(config, k)
+                  for k in [x for x in config.__dict__ if not x.startswith("_")]})
 
 tikz_folder = config['outputfolder']
 
@@ -9,21 +17,31 @@ tikz_folder = config['outputfolder']
 Load data
 ==================================================================================================================
 """
-tip_init, EnergyElastic_init, EnergyKinetic_init, EnergyViscous_init, theta_init                      = load_data(config['inputfolder']+"initial_model")
-tip_pred, EnergyElastic_pred, EnergyKinetic_pred, EnergyViscous_pred, theta_pred, convergence_history = load_data(config['inputfolder']+"inferred_model")
-tip_true, EnergyElastic_true, EnergyKinetic_true, EnergyViscous_true, theta_true                      = load_data(config['inputfolder']+"target_model")
+
+if len(sys.argv) >= 3:
+    timestamp = sys.argv[2]
+    filename = config['inputfolder']+"tip_displacement_noisy_"+timestamp+".csv"
+else:
+    filename = min(glob.iglob(config['inputfolder']+"tip_displacement_noisy_*.csv"), key=os.path.getctime)
+    timestamp = filename[-17:-4]
+tip_meas = np.loadtxt(filename)
+
+tip_init, EnergyElastic_init, EnergyKinetic_init, EnergyViscous_init, theta_init                      = load_data(config['inputfolder']+"model_initial_"+timestamp)
+tip_pred, EnergyElastic_pred, EnergyKinetic_pred, EnergyViscous_pred, theta_pred, convergence_history = load_data(config['inputfolder']+"model_predict_"+timestamp)
+tip_true, EnergyElastic_true, EnergyKinetic_true, EnergyViscous_true, theta_true                      = load_data(config['inputfolder']+"model_target_"+timestamp)
 EnergyTotal_pred = EnergyElastic_pred + EnergyKinetic_pred
 EnergyTotal_true = EnergyElastic_true + EnergyKinetic_true
 
-tip_true = np.loadtxt(config['inputfolder']+"data_tip_displacement.csv")
-tip_meas = np.loadtxt(config['inputfolder']+"data_tip_displacement_noisy.csv")
-tip_init = np.loadtxt(config['inputfolder']+"tip_displacement_init.csv")
-tip_pred = np.loadtxt(config['inputfolder']+"tip_displacement_pred.csv")
+tip_true = np.loadtxt(config['inputfolder']+"tip_displacement_target_"+timestamp+".csv")
+tip_init = np.loadtxt(config['inputfolder']+"tip_displacement_initial_"+timestamp+".csv")
+tip_pred = np.loadtxt(config['inputfolder']+"tip_displacement_predict_"+timestamp+".csv")
 
 time_steps = np.linspace(0, config['FinalTime'], config['nTimeSteps']+1)[1:]
 time_steps_meas = time_steps[:tip_meas.shape[0]]
 if config['exclude_loading']:
     time_steps_meas = time_steps_meas + 1
+
+print(tip_true)
 
 if tip_true.ndim == 2:
     tip_true_tr, tip_true_dev = tip_true[...,0], tip_true[...,1]
@@ -98,7 +116,7 @@ with torch.no_grad():
     plt.gca().yaxis.set_major_formatter(matplotlib.ticker.StrMethodFormatter('{x:,.2f}')) # 2 decimal places
     
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_two_kernels_tip_displacement_bending.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_two_kernels_tip_displacement_bending_"+timestamp+".tex", **tikz_settings)
 
 
     fig = plt.figure('Tip displacement (dev)', **figure_settings)
@@ -112,7 +130,7 @@ with torch.no_grad():
     plt.xlabel(r"$t$")
 
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_two_kernels_tip_displacement_extension.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_two_kernels_tip_displacement_extension_"+timestamp+".tex", **tikz_settings)
 
 
     """
@@ -159,7 +177,7 @@ with torch.no_grad():
     plt.legend(**legend_settings)
 
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_two_kernels_compare_kernels_tr.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_two_kernels_compare_kernels_tr_"+timestamp+".tex", **tikz_settings)
 
 
 
@@ -178,7 +196,7 @@ with torch.no_grad():
     plt.legend(**legend_settings)
 
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_two_kernels_compare_kernels_dev.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_two_kernels_compare_kernels_dev_"+timestamp+".tex", **tikz_settings)
 
     """
     ==================================================================================================================
@@ -200,7 +218,7 @@ with torch.no_grad():
     plt.legend(**legend_settings)
 
     tikzplotlib.clean_figure(fig)
-    tikzplotlib.save(tikz_folder+"plt_two_kernels_convergence.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+"plt_two_kernels_convergence_"+timestamp+".tex", **tikz_settings)
 
 
     """
