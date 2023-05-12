@@ -1,24 +1,16 @@
-from config import *
-import os
-
-folder = config['outputfolder'] + "Modes/"
-config['nTimeSteps'] = 250
+from config.imports import *
+from config.plot_defaults import *
 
 # run simulation if data does not exist in given path
 run = []
 
-if not os.path.exists(folder + "modes_continuous_loading" + ".pkl"):
+if not os.path.exists(config['outputfolder'] + "modes_continuous_loading" + ".pkl"):
     run.append(True)
-if not os.path.exists(folder + "modes_discontinuous_loading" + ".pkl"):
+if not os.path.exists(config['outputfolder'] + "modes_discontinuous_loading" + ".pkl"):
     run.append(False)
 
 for continuos_loading in run:
-
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-
-    config['export_vtk'] = False
-    config['two_kernels'] = False
+        
     infmode = config.get('infmode', False)
 
     cutoff_time = 1.
@@ -43,20 +35,20 @@ for continuos_loading in run:
     Model.forward_solve(loading=load_Bending)
 
     if continuos_loading == True:
-        file = folder + "modes_continuous_loading"
+        file = config['outputfolder'] + "modes_continuous_loading"
     else:
-        file = folder + "modes_discontinuous_loading"
+        file = config['outputfolder'] + "modes_discontinuous_loading"
 
     save_data_modes(file, Model)
 
 for continuos_loading in [True, False]:
 
     if continuos_loading == True:
-        file = folder + "modes_continuous_loading"
-        plt_file = folder + "plt_modes_continuous_loading.tex"
+        file = config['outputfolder'] + "modes_continuous_loading"
+        plt_file = config['outputfolder'] + "plt_modes_continuous_loading.tex"
     else:
-        file = folder + "modes_discontinuous_loading"
-        plt_file = folder + "plt_modes_discontinuous_loading.tex"
+        file = config['outputfolder'] + "modes_discontinuous_loading"
+        plt_file = config['outputfolder'] + "plt_modes_discontinuous_loading.tex"
     displacement, velocity, acceleration, modes = load_data(file)
 
     time_steps = np.linspace(0, config['FinalTime'], config['nTimeSteps']+1)[1:]
