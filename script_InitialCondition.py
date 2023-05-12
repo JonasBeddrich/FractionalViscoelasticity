@@ -1,28 +1,27 @@
+import sys
+import importlib
 from matplotlib.pyplot import figure
-from config import *
 import copy
-import os
+
+if len(sys.argv) == 1:
+    sys.argv.append("config")
+config_name = "config." + sys.argv[1]
+
+config = importlib.import_module(config_name)
+globals().update({k: getattr(config, k)
+                  for k in [x for x in config.__dict__ if not x.startswith("_")]})
     
-tikz_folder = config['outputfolder']+'IC/'
-if not os.path.exists(tikz_folder):
-    os.makedirs(tikz_folder)
+tikz_folder = config['outputfolder']
+timestamp = time.strftime("%Y%m%d-%H%M")
 
 style_colors = matplotlib.rcParams['axes.prop_cycle']
 style_colors = [color for color in style_colors]
 color1 = style_colors[0]['color']
 color2 = style_colors[1]['color']
 
-# Simulation settings
-fg_export = True  ### write results on the disk (True) or only solve (False)
-config['export_vtk'] = False
-
-time_steps = 100 # time steps per second
-
-# Loading (continuous)
-magnitude = 1.
-tmax = 4/5
-tzero = 1.
-load_Bending = Expression(("0", "t <= tm ? p0*t/tm : (t <= tz ? p0*(1 - (t-tm)/(tz-tm)) : 0)", "0"), t=0, tm=tmax, tz=tzero, p0=magnitude, degree=0)
+final_time = config["FinalTime"]
+time_steps = config["nTimeSteps"]
+loading = config["loading"]
 
 """
 ==================================================================================================================
@@ -37,8 +36,8 @@ zener_kernel = False
 
 for alpha in [0.05, 0.5, 0.75, 0.95]:
 
-    # set loading profile
-    config['loading'] = load_Bending
+    # reset loading
+    config['loading'] = loading
 
     if zener_kernel:
         print()
@@ -75,17 +74,17 @@ for alpha in [0.05, 0.5, 0.75, 0.95]:
 
     """
     ==================================================================================================================
-    Continuing with correct condition
+    Continuing with correct modes
     ==================================================================================================================
     """
 
     print()
     print("================================")
-    print("   CONTINUE CORRECT CONDITION")
+    print("   CONTINUE CORRECT MODES")
     print("================================")
 
-    config["FinalTime"] = 4
-    config["nTimeSteps"] = 4*time_steps
+    config["FinalTime"] = final_time-1
+    config["nTimeSteps"] = (final_time-1)*time_steps
     config["loading"] = Expression(("0", "0", "0"), degree=0)
 
     kernels_correct = [SumOfExponentialsKernel(parameters=parameters)]
@@ -102,28 +101,28 @@ for alpha in [0.05, 0.5, 0.75, 0.95]:
 
     """
     ==================================================================================================================
-    Continuing with wrong condition
+    Continuing with zeroed modes
     ==================================================================================================================
     """
 
     print()
     print("================================")
-    print("   CONTINUE WRONG CONDITION")
+    print("   CONTINUE ZEROED MODES")
     print("================================")
 
-    kernels_wrong = [SumOfExponentialsKernel(parameters=parameters)]
-    wrong = ViscoelasticityProblem(**config, kernels=copy.deepcopy(kernels_wrong))
+    kernels_zeroed = [SumOfExponentialsKernel(parameters=parameters)]
+    zeroed = ViscoelasticityProblem(**config, kernels=copy.deepcopy(kernels_zeroed))
 
-    wrong.kernels[0].modes = copy.deepcopy(IC.kernels[0].modes)
-    wrong.kernels[0].F_old = copy.deepcopy(IC.kernels[0].F_old)
-    wrong.kernels[0].modes = 0
-    wrong.kernels[0].F_old = 0
+    zeroed.kernels[0].modes = copy.deepcopy(IC.kernels[0].modes)
+    zeroed.kernels[0].F_old = copy.deepcopy(IC.kernels[0].F_old)
+    zeroed.kernels[0].modes = 0
+    zeroed.kernels[0].F_old = 0
 
-    wrong.u = copy.deepcopy(IC.u)
-    wrong.v = copy.deepcopy(IC.v)
-    wrong.a = copy.deepcopy(IC.a)
+    zeroed.u = copy.deepcopy(IC.u)
+    zeroed.v = copy.deepcopy(IC.v)
+    zeroed.a = copy.deepcopy(IC.a)
 
-    wrong.forward_solve(loading=config.get("loading"))
+    zeroed.forward_solve(loading=config.get("loading"))
 
     """
     ==================================================================================================================
@@ -145,18 +144,18 @@ for alpha in [0.05, 0.5, 0.75, 0.95]:
         plt.plot([IC.time_steps[-1], *(correct.time_steps + 1.)], [IC.velocity_norm[-1], *correct.velocity_norm], color=color1, **plot_settings, linestyle="--")
         plt.plot([IC.time_steps[-1], *(correct.time_steps + 1.)], [IC.acceleration_norm[-1], *correct.acceleration_norm], color=color1, linestyle=":", **plot_settings)
 
-        plt.plot([IC.time_steps[-1], *(wrong.time_steps + 1.)], [IC.observations.numpy()[-1], *wrong.observations.numpy()], color=color2, label="zeroed", **plot_settings)
-        plt.plot([IC.time_steps[-1], *(wrong.time_steps + 1.)], [IC.velocity_norm[-1], *wrong.velocity_norm], color=color2, linestyle="--", **plot_settings)
-        plt.plot([IC.time_steps[-1], *(wrong.time_steps + 1.)], [IC.acceleration_norm[-1], *wrong.acceleration_norm], color=color2, linestyle=":", **plot_settings)
+        plt.plot([IC.time_steps[-1], *(zeroed.time_steps + 1.)], [IC.observations.numpy()[-1], *zeroed.observations.numpy()], color=color2, label="zeroed", **plot_settings)
+        plt.plot([IC.time_steps[-1], *(zeroed.time_steps + 1.)], [IC.velocity_norm[-1], *zeroed.velocity_norm], color=color2, linestyle="--", **plot_settings)
+        plt.plot([IC.time_steps[-1], *(zeroed.time_steps + 1.)], [IC.acceleration_norm[-1], *zeroed.acceleration_norm], color=color2, linestyle=":", **plot_settings)
 
         plt.axvline([1], ymin=-0.05, ymax=1.5, color="grey", linestyle="--", **plot_settings, zorder=-10)
-        plt.xlim([0, 5])
+        plt.xlim([0, final_time])
         plt.legend()
         plt.ylabel(r"Tip displacement")
         plt.xlabel(r"$t$")
 
         #tikzplotlib.clean_figure(fig)
-        tikzplotlib.save(tikz_folder+f"plt_ic_displacement_alpha{alpha}.tex", **tikz_settings)
+        tikzplotlib.save(tikz_folder+f"plt_ic_displacement_alpha{alpha}_"+timestamp+".tex", **tikz_settings)
         plt.close()
 
         fig = plt.figure('Tip displacement', **figure_settings)
@@ -164,13 +163,13 @@ for alpha in [0.05, 0.5, 0.75, 0.95]:
 
         tmp = IC.modes_norm[-1, :]
         correct_modes = np.vstack((tmp, correct.modes_norm))
-        wrong_modes   = np.vstack((np.zeros_like(tmp), wrong.modes_norm))
+        zeroed_modes   = np.vstack((np.zeros_like(tmp), zeroed.modes_norm))
         plt.plot([IC.time_steps[-1], *(correct.time_steps + 1.)], correct_modes, **plot_settings, zorder=10, color=color1)
-        plt.plot([IC.time_steps[-1], *(correct.time_steps + 1.)], wrong_modes, **plot_settings, zorder=10, color=color2)
+        plt.plot([IC.time_steps[-1], *(correct.time_steps + 1.)], zeroed_modes, **plot_settings, zorder=10, color=color2)
         plt.ylabel(r"Norm of modes")
         plt.xlabel(r"$t$")
         plt.axvline([1], ymin=-0.05, ymax=1.5, color="grey", linestyle="--", **plot_settings, zorder=-10)
-        plt.xlim([0, 5])
+        plt.xlim([0, final_time])
 
         plt.plot([1], [0], color=color1, label="correct", zorder=-10)
         plt.plot([1], [0], color=color2, label="zeroed", zorder=-10)
@@ -178,5 +177,5 @@ for alpha in [0.05, 0.5, 0.75, 0.95]:
         plt.legend()
 
         tikz_settings['axis_width'] = '0.45*160mm'
-        tikzplotlib.save(tikz_folder+f"plt_ic_modes_alpha{alpha}.tex", **tikz_settings)
+        tikzplotlib.save(tikz_folder+f"plt_ic_modes_alpha{alpha}_"+timestamp+".tex", **tikz_settings)
         plt.close()
