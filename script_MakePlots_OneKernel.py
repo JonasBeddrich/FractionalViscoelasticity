@@ -9,11 +9,12 @@ tikz_folder = config['outputfolder']
 Load data
 ==================================================================================================================
 """
+
 if len(sys.argv) >= 3:
     timestamp = sys.argv[2]
     filename = config['inputfolder']+"tip_displacement_noisy_"+timestamp+".csv"
 else:
-    filename = min(glob.iglob(config['inputfolder']+"tip_displacement_noisy_*.csv"), key=os.path.getctime)
+    filename = max(glob.iglob(config['inputfolder']+"tip_displacement_noisy_*.csv"), key=os.path.getctime)
     timestamp = filename[-17:-4]
 tip_meas = np.loadtxt(filename)
 
