@@ -1,13 +1,4 @@
-import sys
-import importlib
-
-if len(sys.argv) == 1:
-    sys.argv.append("config")
-config_name = "config." + sys.argv[1]
-
-config = importlib.import_module(config_name)
-globals().update({k: getattr(config, k)
-                  for k in [x for x in config.__dict__ if not x.startswith("_")]})
+from config.imports import * 
 
 fg_export = True    ### write results on the disk (True) or only solve (False)
 config_initial = config.copy()

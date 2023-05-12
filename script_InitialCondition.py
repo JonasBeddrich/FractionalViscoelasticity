@@ -1,15 +1,6 @@
-import sys
-import importlib
+from config.imports import * 
 from matplotlib.pyplot import figure
 import copy
-
-if len(sys.argv) == 1:
-    sys.argv.append("config")
-config_name = "config." + sys.argv[1]
-
-config = importlib.import_module(config_name)
-globals().update({k: getattr(config, k)
-                  for k in [x for x in config.__dict__ if not x.startswith("_")]})
     
 tikz_folder = config['outputfolder']
 timestamp = time.strftime("%Y%m%d-%H%M")
