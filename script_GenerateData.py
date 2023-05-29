@@ -104,7 +104,7 @@ if isinstance(loading, list): ### multiple loadings case
         return obs.numpy()
 else:
     def Forward():
-        Model.forward_solve()
+        Model.forward_solve(loading=loading)
         obs = Model.observations
         return obs.numpy()
 

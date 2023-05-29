@@ -181,8 +181,8 @@ class InverseProblem:
                 return obs
         else:
             def Forward():
-                Model.forward_solve()
                 Model.initialize_state()
+                Model.forward_solve(loading=loading)
                 obs = Model.observations
                 return obs
 

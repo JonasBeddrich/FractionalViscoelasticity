@@ -117,7 +117,7 @@ if fg_export:
             obs = torch.cat([obs, model.observations], dim=-1)
         pred = obs.numpy()
     else:
-        model.forward_solve()
+        model.forward_solve(loading=loading)
         obs = model.observations
         pred =  obs.numpy()
     
@@ -184,7 +184,8 @@ if isinstance(loading, list): ### multiple loadings case
         obs = torch.cat([obs, model.observations], dim=-1)
     pred = obs.numpy()
 else:
-    model.forward_solve()
+    model.initialize_state()
+    model.forward_solve(loading=loading)
     obs = model.observations
     pred =  obs.numpy()
 
