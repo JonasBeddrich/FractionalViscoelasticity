@@ -6,8 +6,8 @@ Problem Configuration
 ==================================================================================================================
 """
 
-inputfolder  = "./workfolder/Convergence"
-outputfolder = "./workfolder/Convergence"
+inputfolder  = "./workfolder/Convergence/"
+outputfolder = "./workfolder/Convergence/"
 
 os.makedirs(inputfolder, exist_ok=True)
 os.makedirs(outputfolder, exist_ok=True)

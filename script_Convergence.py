@@ -18,7 +18,7 @@ if infmode == True:
 kernel = SumOfExponentialsKernel(parameters=parameters)
 kernels = [kernel]
 
-path = config['outputfolder']+f"/alpha{alpha}/"
+path = config['outputfolder']+f"alpha{alpha}/"
 if not os.path.exists(path):
     os.makedirs(path)
 

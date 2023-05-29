@@ -21,10 +21,10 @@ for idx, alpha in enumerate([0., 0.25, 0.5, 0.75, 1.]):
     print(f"Alpha = {alpha}")
 
     dir = config['outputfolder']
-    tikz_folder = dir + "/plots/"
+    tikz_folder = dir + "plots/"
     if not os.path.exists(tikz_folder):
         os.makedirs(tikz_folder)
-    dir += "/alpha" + str(alpha) + "/"
+    dir += "alpha" + str(alpha) + "/"
 
     # store full data and data with excluded loading in dictionaries using number of timesteps per second as keys
     data = {}

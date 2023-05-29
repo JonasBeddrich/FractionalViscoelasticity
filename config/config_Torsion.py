@@ -6,8 +6,8 @@ Problem Configuration
 ==================================================================================================================
 """
 
-inputfolder  = "./workfolder/Torsion"
-outputfolder = "./workfolder/Torsion"
+outputfolder = "./workfolder/Torsion/"
+inputfolder  = "./workfolder/Torsion/"
 
 os.makedirs(inputfolder, exist_ok=True)
 os.makedirs(outputfolder, exist_ok=True)
