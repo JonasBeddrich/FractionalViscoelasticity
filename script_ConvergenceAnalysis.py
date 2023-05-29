@@ -1,7 +1,6 @@
-from apps.config import *
-import numpy as np
+from config.imports import *
+from config.plot_defaults import *
 from scipy.optimize import curve_fit
-import os
 
 # exclude t < 1 from error
 exclude_loading = True
@@ -22,10 +21,10 @@ for idx, alpha in enumerate([0., 0.25, 0.5, 0.75, 1.]):
     print(f"Alpha = {alpha}")
 
     dir = config['outputfolder']
-    tikz_folder = dir + "convergence/plots/"
+    tikz_folder = dir + "/plots/"
     if not os.path.exists(tikz_folder):
         os.makedirs(tikz_folder)
-    dir += "convergence/alpha" + str(alpha)
+    dir += "/alpha" + str(alpha) + "/"
 
     # store full data and data with excluded loading in dictionaries using number of timesteps per second as keys
     data = {}
@@ -33,10 +32,14 @@ for idx, alpha in enumerate([0., 0.25, 0.5, 0.75, 1.]):
     numsteps = []
     numsteps_full = []
 
-    for filename in os.listdir(dir):
-        filepath = os.path.join(dir, filename)
-        if not os.path.isfile(filepath):
-            continue
+    if len(sys.argv) > 2:
+        timestamp = sys.argv[2]
+        filenames = glob.iglob(dir+f"tipdisplacement_{timestamp}*.txt")
+    else:
+        print("Please pass timestamp of convergence runs to use for analysis. Aborting!")
+        sys.exit()
+
+    for filename in filenames:
         try:
             tmp_num = int(float((filename.split("_")[-1]).rstrip(".txt")))//5*4
             tmp_num_full = int(float((filename.split("_")[-1]).rstrip(".txt")))
@@ -45,10 +48,15 @@ for idx, alpha in enumerate([0., 0.25, 0.5, 0.75, 1.]):
 
         numsteps.append(tmp_num)
         numsteps_full.append(tmp_num_full)
-        tmp_data_full = np.insert(np.loadtxt(filepath), 0, 0.)
+        tmp_data_full = np.insert(np.loadtxt(filename), 0, 0.)
         tmp_data = np.copy(tmp_data_full[len(tmp_data_full)//5:])
         data.update({tmp_num : tmp_data})
         data_full.update({tmp_num_full : tmp_data_full})
+
+    print(numsteps)
+    if len(numsteps) == 0:
+        print(f"No data found for alpha={alpha}. Aborting!")
+        sys.exit()
 
     if not exclude_loading:
         numsteps = numsteps_full
@@ -77,7 +85,7 @@ for idx, alpha in enumerate([0., 0.25, 0.5, 0.75, 1.]):
 
     tikzplotlib.clean_figure(fig)
     tikz_settings['axis_width'] = "0.45*160mm"
-    tikzplotlib.save(tikz_folder+f"plt_convergence_solution_{alpha}.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+f"plt_convergence_solution_{alpha}_{timestamp}.tex", **tikz_settings)
     plt.close(fig)
 
     error = []
@@ -113,7 +121,7 @@ for idx, alpha in enumerate([0., 0.25, 0.5, 0.75, 1.]):
 
     tikzplotlib.clean_figure(fig)
     tikz_settings['axis_width'] = "0.45*160mm"
-    tikzplotlib.save(tikz_folder+f"plt_convergence_{alpha}.tex", **tikz_settings)
+    tikzplotlib.save(tikz_folder+f"plt_convergence_{alpha}_{timestamp}.tex", **tikz_settings)
     plt.close(fig)
     
     print("Plots for specific alpha created.")
@@ -136,7 +144,7 @@ plt.legend()
 
 tikzplotlib.clean_figure(fig_all)
 tikz_settings['axis_width'] = "0.7*160mm"
-tikzplotlib.save(tikz_folder+f"plt_convergence.tex", **tikz_settings)
+tikzplotlib.save(tikz_folder+f"plt_convergence_{timestamp}.tex", **tikz_settings)
 
 print("Overview plot generated.")
 plt.show()

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 read -p "Alpha: " alpha
-read -p "Maxindex (1000*2^i): " maxindex
+read -p "Maximum numer of steps per second (1000*2^i): " maxindex
 export PYTHONPATH=.
 
 for ((i = 0 ; i <= $maxindex; i++)); do
     echo "Running n =" $i
-    mpirun -np 1 python apps/convergence/script_convergence.py $alpha $i $maxindex&
+    mpirun -np 1 python script_Convergence.py config_Convergence $1 $alpha $i $maxindex&
 done
 
 wait
