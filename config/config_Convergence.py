@@ -56,5 +56,5 @@ config = {
     'two_kernels'       :   False,
 
     ### Measurements
-    'observer'          :   TipDisplacementObserver,
+    'observer'          :   TipNormDisplacementObserver,
 }

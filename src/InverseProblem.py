@@ -171,10 +171,13 @@ class InverseProblem:
 
         ### Loading type
         loading = kwargs.get("loading", None)
+        observer = kwargs.get("observer", None)
         if isinstance(loading, list): ### multiple loadings case
             def Forward():
                 obs = torch.tensor([])
-                for loading_instance in loading:
+                for i, loading_instance in enumerate(loading):
+                    if isinstance(observer, list): ### multiple observers
+                        Model.set_observer(observer[i])
                     Model.initialize_state()
                     Model.forward_solve(loading=loading_instance)
                     obs = torch.cat([obs, Model.observations], dim=-1)

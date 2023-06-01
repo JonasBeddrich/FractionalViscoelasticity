@@ -41,7 +41,7 @@ config = {
     'mesh'              :   mesh,
     'DirichletBoundary' :   DirichletBoundary,
     'NeumannBoundary'   :   NeumannBoundary,
-    'loading'           :   load_Bending, ###  load_Bending, [load_Bending, load_Extension]
+    'loading'           :   load_Bending,
 
     'infmode'           :   True,
     'zener_kernel'      :   True,
@@ -56,5 +56,5 @@ config = {
     'two_kernels'       :   False,
 
     ### Measurements
-    'observer'          :   TipDisplacementObserver,
+    'observer'          :   TipYDisplacementObserver,
 }

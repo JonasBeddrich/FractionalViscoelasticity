@@ -87,9 +87,17 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         ### Observations and QoIs
         observer = kwargs.get("observer", None)
         if observer:
-            self.observer = observer(Model=self)
+            if isinstance(observer, list):
+                self.observer = observer[0](Model=self)
+            else:
+                self.observer = observer(Model=self)
 
         self.initialize_state()
+
+
+    ### Set a new observer
+    def set_observer(self, observer):
+        self.observer = observer(Model=self)
 
 
     ### Set the kernels

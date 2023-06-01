@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from src.Viscoelasticity import ViscoelasticityProblem
 from src.Kernels import SumOfExponentialsKernel
 from src.InverseProblem import InverseProblem
-from src.Observers import TipDisplacementObserver
+from src.Observers import *
 from src.Objectives import MSE
 from src.Regularization import myRegularizationTerm as reg
 from src.RationalApproximation import RationalApproximation_AAA as RationalApproximation

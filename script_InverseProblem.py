@@ -110,9 +110,12 @@ if fg_export:
     model.flags["inverse"] = False
 
     loading = config.get("loading", None)
+    observer = config.get("observer", None)
     if isinstance(loading, list): ### multiple loadings case
         obs = torch.tensor([])
-        for loading_instance in loading:
+        for i, loading_instance in enumerate(loading):
+            if isinstance(observer, list): ### multiple observers
+                model.set_observer(observer[i])
             model.forward_solve(loading=loading_instance)
             obs = torch.cat([obs, model.observations], dim=-1)
         pred = obs.numpy()
@@ -177,9 +180,12 @@ model.set_time_stepper(nTimeSteps=nsteps, FinalTime=T)
 model.flags["inverse"] = False
 
 loading = config.get("loading", None)
+observer = config.get("observer", None)
 if isinstance(loading, list): ### multiple loadings case
     obs = torch.tensor([])
-    for loading_instance in loading:
+    for i, loading_instance in enumerate(loading):
+        if isinstance(observer, list): ### multiple observers
+            model.set_observer(observer[i])
         model.forward_solve(loading=loading_instance)
         obs = torch.cat([obs, model.observations], dim=-1)
     pred = obs.numpy()
