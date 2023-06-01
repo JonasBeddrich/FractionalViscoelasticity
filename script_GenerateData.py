@@ -17,68 +17,72 @@ print("================================")
 infmode = config.get('infmode', False)
 zener_kernel = config.get('zener_kernel', False)
 
-if config['two_kernels']:
-    if zener_kernel:
-        tau_eps = .2
-        tau_sig = .1
-        
-        alpha1 = 0.2
-        TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha1)/(x**-alpha1 + 1/tau_sig)
-        RA = RationalApproximation(alpha=alpha1, TargetFunction=TargetFunction)
-        parameters1 = list(RA.c) + list(RA.d)
-        if infmode==True: parameters1.append(RA.c_inf)
-        kernel1  = SumOfExponentialsKernel(parameters=parameters1)
-        print("nModes kernel 1: ", RA.nModes)
+if not "kernels" in config:
+    if config['two_kernels']:
+        if zener_kernel:
+            tau_eps = .2
+            tau_sig = .1
 
-        alpha2 = 0.5
-        TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha2)/(x**-alpha2 + 1/tau_sig)
-        RA = RationalApproximation(alpha=alpha2, TargetFunction=TargetFunction)
-        parameters2 = list(RA.c) + list(RA.d)
-        if infmode==True: parameters2.append(RA.c_inf)
-        kernel2  = SumOfExponentialsKernel(parameters=parameters2)
-        print("nModes kernel 2: ", RA.nModes)
+            alpha1 = 0.2
+            TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha1)/(x**-alpha1 + 1/tau_sig)
+            RA = RationalApproximation(alpha=alpha1, TargetFunction=TargetFunction)
+            parameters1 = list(RA.c) + list(RA.d)
+            if infmode==True: parameters1.append(RA.c_inf)
+            kernel1  = SumOfExponentialsKernel(parameters=parameters1)
+            print("nModes kernel 1: ", RA.nModes)
+
+            alpha2 = 0.5
+            TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha2)/(x**-alpha2 + 1/tau_sig)
+            RA = RationalApproximation(alpha=alpha2, TargetFunction=TargetFunction)
+            parameters2 = list(RA.c) + list(RA.d)
+            if infmode==True: parameters2.append(RA.c_inf)
+            kernel2  = SumOfExponentialsKernel(parameters=parameters2)
+            print("nModes kernel 2: ", RA.nModes)
+
+        else:
+            alpha1 = 0.9
+            RA = RationalApproximation(alpha=alpha1)
+            parameters1 = list(RA.c) + list(RA.d)
+            if infmode==True: parameters1.append(RA.c_inf)
+            kernel1 = SumOfExponentialsKernel(parameters=parameters1)
+            print("nModes kernel 1: ", RA.nModes)
+
+            alpha2 = 0.7
+            RA = RationalApproximation(alpha=alpha2)
+            parameters2 = list(RA.c) + list(RA.d)
+            if infmode==True: parameters2.append(RA.c_inf)
+            kernel2 = SumOfExponentialsKernel(parameters=parameters2)
+            print("nModes kernel 2: ", RA.nModes)
+
+        kernels    = [kernel1, kernel2]
+        config["kernels"] = kernels
+        parameters = [parameters1, parameters2]
 
     else:
-        alpha1 = 0.9
-        RA = RationalApproximation(alpha=alpha1)
-        parameters1 = list(RA.c) + list(RA.d)
-        if infmode==True: parameters1.append(RA.c_inf)
-        kernel1 = SumOfExponentialsKernel(parameters=parameters1)
-        print("nModes kernel 1: ", RA.nModes)
-    
-        alpha2 = 0.7
-        RA = RationalApproximation(alpha=alpha2)
-        parameters2 = list(RA.c) + list(RA.d)
-        if infmode==True: parameters2.append(RA.c_inf)
-        kernel2 = SumOfExponentialsKernel(parameters=parameters2)
-        print("nModes kernel 2: ", RA.nModes)
-
-    kernels    = [kernel1, kernel2]
-    parameters = [parameters1, parameters2]
+        if zener_kernel:
+            alpha = 0.5
+            tau_eps = .2
+            tau_sig = .1
+            TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha)/(x**-alpha + 1/tau_sig)
+            RA = RationalApproximation(alpha=alpha, TargetFunction=TargetFunction)
+            parameters = list(RA.c) + list(RA.d)
+            if infmode==True: parameters.append(RA.c_inf)
+            kernel  = SumOfExponentialsKernel(parameters=parameters)
+            kernels = [kernel]
+            config["kernels"] = kernels
+        else:
+            alpha = 0.7
+            RA = RationalApproximation(alpha=alpha)
+            parameters = list(RA.c) + list(RA.d)
+            if infmode==True: parameters.append(RA.c_inf)
+            kernel = SumOfExponentialsKernel(parameters=parameters)
+            kernels = [kernel]
+            config["kernels"] = kernels
+        print("nModes kernel: ", RA.nModes)
 
 else:
-    if zener_kernel:
-        alpha = 0.5
-        tau_eps = .2
-        tau_sig = .1
-        TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha)/(x**-alpha + 1/tau_sig)
-        RA = RationalApproximation(alpha=alpha, TargetFunction=TargetFunction)
-        parameters = list(RA.c) + list(RA.d)
-        if infmode==True: parameters.append(RA.c_inf)
-        kernel  = SumOfExponentialsKernel(parameters=parameters)
-        kernels = [kernel]
-    else:
-        alpha = 0.7
-        RA = RationalApproximation(alpha=alpha)
-        parameters = list(RA.c) + list(RA.d)
-        if infmode==True: parameters.append(RA.c_inf)
-        kernel = SumOfExponentialsKernel(parameters=parameters)
-        kernels = [kernel]
-    print("nModes kernel: ", RA.nModes)
-
-
-
-
+    print("Kernel(s) given in config")
+    parameters = config.get("parameters", None)
 
 """
 ==================================================================================================================
@@ -92,7 +96,7 @@ print("================================")
 print("       FORWARD RUN")
 print("================================")
 
-Model = ViscoelasticityProblem(**config, kernels=kernels)
+Model = ViscoelasticityProblem(**config)
 
 loading = config.get("loading", None)
 observer = config.get("observer", None)
