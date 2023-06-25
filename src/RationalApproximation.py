@@ -165,7 +165,7 @@ class RationalApproximation_AAA(BasicRationalApproximation):
         Wt = scipy.sparse.spdiags(np.ones_like(F).flatten(),0,M,M)
         # Wt = scipy.sparse.spdiags((1/F).flatten(),0,M,M)
         J = np.arange(M)
-        J_opt = np.array([], dtype=np.int)
+        J_opt = np.array([], dtype=np.int32)
         z = np.array([]).reshape([0,1])
         f = np.array([]).reshape([0,1])
         C = np.array([]).reshape([M,0])

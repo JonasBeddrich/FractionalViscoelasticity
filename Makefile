@@ -26,9 +26,9 @@ ConvergenceAll: config/config_Convergence.py
 
 IPStability: config/config_IPStability.py
 	time=$$(date +%Y%m%d-%H%M)
-	python script_GenerateData.py config_IPStability $$time
-	python script_IPStability.py config_IPStability $$time 0.5 &
-	python script_IPStability.py config_IPStability $$time 0.8 &
-	python script_IPStability.py config_IPStability $$time 0.2 &
+	mpirun -np 1 python script_GenerateData.py config_IPStability $$time
+	mpirun -np 1 python script_IPStability.py config_IPStability $$time 0.5 &
+	mpirun -np 1 python script_IPStability.py config_IPStability $$time 0.8 &
+	mpirun -np 1 python script_IPStability.py config_IPStability $$time 0.2 &
 	wait
-	python script_MakePlots_IPStability.py config_IPStability $$time
+	mpirun -np 1 python script_MakePlots_IPStability.py config_IPStability $$time
