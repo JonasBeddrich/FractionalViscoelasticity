@@ -69,7 +69,7 @@ config = {
     'two_kernels'       :   True,
 
     ### Measurements
-    'observer'          :   TipDisplacementObserver,
+    'observer'          :   TipYDisplacementObserver,
     'noise_level'       :   2, ### [%]
 
     ### Optimization

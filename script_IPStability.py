@@ -3,12 +3,28 @@ from config.imports import *
 fg_export = True    ### write results on the disk (True) or only solve (False)
 config_initial = config.copy()
 
-noise_level = config['noise_level'] ### [%]
 exclude_loading = config['exclude_loading']
 infmode = config.get('infmode', False)
 
 config['initial_guess'] = None
 config['two_kernels'] = False
+
+if len(sys.argv) >= 4:
+    alpha = float(sys.argv[3])
+else:
+    print("Pass alpha for initial guess as parameter. Aborting!")
+    sys.exit()
+
+if len(sys.argv) >= 5:
+    noise_level = float(sys.argv[4])
+else:
+    print("Pass noise percentage as parameter. Aborting!")
+    sys.exit()
+
+if len(sys.argv) >= 6:
+    folder = sys.argv[5] + "/"
+    config['outputfolder'] = os.path.join(config['outputfolder'], folder)
+    os.makedirs(config['outputfolder'], exist_ok=True)
 
 """
 ==================================================================================================================
@@ -74,12 +90,6 @@ plt.show()
 Configure kernel
 ==================================================================================================================
 """
-
-if len(sys.argv) >= 4:
-    alpha = float(sys.argv[3])
-else:
-    print("Pass alpha for initial guess as parameter. Aborting!")
-    sys.exit()
 
 # generate kernel for given alpha with correct number of modes
 nModes = config.get("nModes", 10)

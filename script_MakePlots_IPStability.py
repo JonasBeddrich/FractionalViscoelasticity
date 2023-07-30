@@ -1,6 +1,7 @@
 from config.imports import * 
 from config.plot_defaults import *
 import matplotlib
+from scipy.optimize import minimize, Bounds
 
 tikz_folder = config['outputfolder']
 
@@ -59,8 +60,89 @@ time_steps_meas = time_steps[:tip_meas.size]
 
 alphas.sort()
 
+# Find corresponding alpha for predicted kernel
+"""
+t = np.geomspace(0.04, 4, 100)
+
+infmode = config.get('infmode', False)
+nModes = config.get("nModes", 10)
+tau_eps = config.get("tau_eps", 0.2)
+tau_sig = config.get("tau_sig", 0.1)
+TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha)/(x**-alpha + 1/tau_sig)
+tol = 1e-6 # determines number of modes
+
+alpha = 0.8
+data = pred[alpha]["kernel"].eval_func(t)
+
+def objective(alpha, data, tol):
+    TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha)/(x**-alpha + 1/tau_sig)
+    RA = RationalApproximation(alpha=alpha, TargetFunction=TargetFunction, tol=tol)
+    parameters = list(RA.c) + list(RA.d)
+    print(RA.nModes)
+    if infmode==True: parameters.append(RA.c_inf)
+    kernel_test = SumOfExponentialsKernel(parameters=parameters)
+    test = kernel_test.eval_func(t)
+    return np.linalg.norm(data - test, ord=2)
+
+bound = Bounds(0, 1)
+opt = minimize(objective, 0.5, args=(data, tol), bounds=bound)
+print(opt)
+
+alpha = opt.x
+TargetFunction = lambda x: (tau_eps/tau_sig - 1) * x**(1-alpha)/(x**-alpha + 1/tau_sig)
+RA = RationalApproximation(alpha=alpha, TargetFunction=TargetFunction, tol=tol)
+parameters = list(RA.c) + list(RA.d)
+if infmode==True: parameters.append(RA.c_inf)
+kernel_test = SumOfExponentialsKernel(parameters=parameters)
+test = kernel_test.eval_func(t)
+true = pred["true"]["kernel"].eval_func(t)
+plt.plot(t, true, label="True")
+plt.plot(t, data, label="Prediction")
+plt.plot(t, test, label="Alpha fit")
+plt.legend()
+plt.xscale("log")
+plt.show()
+sys.exit()
+"""
+
+
+
+t = np.geomspace(0.05, 2, 100)
+true_kernel = pred["true"]["kernel"]
+
+for alpha in alphas:
+    p = pred[alpha]["convergence"]["parameters"]
+    num_steps = len(p)
+    cmap = matplotlib.colormaps["viridis_r"]
+    colors = [cmap(i/num_steps) for i in range(num_steps)]
+    for i in range(num_steps):
+        with torch.no_grad():
+            theta = np.array(pred[alpha]["convergence"]["parameters"])[i].flatten()
+        kernel = SumOfExponentialsKernel(parameters = theta)
+        #plt.plot(t, kernel.eval_func(t), color=colors[i])
+        plt.plot(t, (kernel.eval_func(t) - true_kernel.eval_func(t))/true_kernel.eval_func(t), color=colors[i]) # relative error
+
+    #plt.plot(t, true_kernel.eval_func(t), "--", color="red", label=f"True", **plot_settings)
+    plt.plot(t, t*0, "--", color="red", label=f"True", **plot_settings) # relative error
+
+    plt.xscale('log')
+    plt.title(fr"Kernel evolution $\alpha_0={alpha}$")
+    plt.ylabel(r"$k_{pred}(t)$")
+    cmap = "viridis_r"
+    norm = matplotlib.colors.Normalize(vmin=0,vmax=num_steps-1)
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    plt.colorbar(sm, label="Iteration", orientation="horizontal")
+    plt.ylabel(r"$\frac{k_{pred}(t) - k(t)}{k(t)}$") # relative error
+    plt.xlabel(r"$t$")
+    #plt.savefig(config['outputfolder']+f"plt_kernel_evolution_alpha{alpha}.pdf", bbox_inches="tight")
+    plt.show()
+
+sys.exit()
+"""
 cmap = matplotlib.colormaps["tab10"]
 colors = [cmap(i) for i in range(10)]
+
 
 plt.plot(time_steps, pred["true"]["tip"], "-", color="grey", label=f"True")
 for i, alpha in enumerate(alphas):
@@ -139,6 +221,7 @@ figweight.savefig(config['outputfolder']+f"plt_convergence_weights_{timestamp}.p
 figexponent.savefig(config['outputfolder']+f"plt_convergence_exponents_{timestamp}.pdf", bbox_inches="tight")
 
 plt.show()
+"""
 
 sys.exit()
 
