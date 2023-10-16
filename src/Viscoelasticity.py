@@ -243,7 +243,7 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         self.v_func = Function(self.V, name="velocity")
         self.a_func = Function(self.V, name="acceleration")
         self.w_func = Function(self.V, name="axilary variable")
-        self.H_func = Function(self.V, name="hisory term")
+        self.H_func = Function(self.V, name="history term")
         self.p_func = Function(self.V, name="loading")
         self.mode_func = Function(self.V, name="modes for energy")
 
@@ -376,8 +376,8 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         if loading is not None:
             self.set_load(loading=loading)
 
-        if self.flags['unique_kernel'] == False:
-            self.initialize_state()
+        # if self.flags['unique_kernel'] == False:
+        self.initialize_state()
 
         for (i, t) in tqdm(enumerate(self.time_steps), total=self.time_steps.size):
 
@@ -390,7 +390,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
 
             self.observe()
             self.user_defined_routines(t, i)
-            
 
         self.observations = torch.stack(self.observations)
         return self.observations

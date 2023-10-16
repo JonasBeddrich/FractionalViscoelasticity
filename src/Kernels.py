@@ -80,13 +80,13 @@ class SumOfExponentialsKernel(AbstractKernel):
         self.eval_func     = np.vectorize(self._eval_func)
         self.eval_spectrum = np.vectorize(self._eval_spectrum)
 
-
     ### Initialize parameters from a rational approximation
     def default_parameters(self, **kwargs):
         from .RationalApproximation import RationalApproximation_AAA as RationalApproximation
         settings = kwargs.get("init_fractional", {"alpha" : 0.5, "tol" : 1.e-4 }) ### dictionary of RA settings
         RA = RationalApproximation(**settings)
         parameters = list(RA.c) + list(RA.d)
+        print(len(parameters))
         if kwargs.get("infmode", False):
             parameters.append(RA.c_inf)
         return parameters
@@ -103,7 +103,7 @@ class SumOfExponentialsKernel(AbstractKernel):
             else:
                 self.infmode_bool = True
 
-        self.weights   = self._kernel_parameters[:self.nModes].square()
+        self.weights = self._kernel_parameters[:self.nModes].square()
         if self.infmode_bool:
             self.exponents = self._kernel_parameters[self.nModes:-1].square()
             self.infmode   = self._kernel_parameters[-1].square()
