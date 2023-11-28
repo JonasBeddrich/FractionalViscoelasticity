@@ -48,13 +48,13 @@ config = {
     'outputfolder'      :   outputfolder,
     'export_vtk'        :   False,
 
-    'FinalTime'         :   5,
+    'FinalTime'         :   2,
     'nTimeSteps'        :   100,
 
     'mesh'              :   mesh,
     'DirichletBoundary' :   DirichletBoundary,
     'NeumannBoundary'   :   NeumannBoundary,
-    'loading'           :   [load_Bending, load_Extension],
+    'loading'           :   [load_Bending],# load_Extension],
 
     'infmode'           :   True,
     'zener_kernel'      :   True,
@@ -70,12 +70,12 @@ config = {
 
     ### Measurements
     'observer'          :   [TipYDisplacementObserver, TipXDisplacementObserver],
-    'noise_level'       :   2, ### [%]
+    'noise_level'       :   5, ### [%]
 
     ### Optimization
-    "init_fractional"   :   {"alpha" : 0.7, "tol" : 1.e-4 },
+    "init_fractional"   :   {"alpha" : 0.7, "tol" : 1.e-8},
     'optimizer'         :   torch.optim.LBFGS, ### E.g., torch.optim.SGD, torch.optim.LBFGS (recommended), ...
-    'max_iter'          :   100,
+    'max_iter'          :   5,
     'tol'               :   1.e-4,
     'regularization'    :   None,  ### your regularization function, e.g., "reg", or None/False for no regularization
     'initial_guess'     :   None,  ### initial guess for parameters calibration: (weights, exponents)

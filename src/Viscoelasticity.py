@@ -275,7 +275,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
             self.loading.t = time
             self.f_surf = assemble(self.loading_form)
 
-
     def update_state(self):
         h  = self.dt
         un = self.u
@@ -306,8 +305,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
             # if self.flag['viscosity']:
             #     self.w_func.vector()[:] = self.w.detach().numpy()
             #     self.H_func.vector()[:] = self.history.detach().numpy()
-
-
 
     def export_state(self, time=0):
         if self.flags['export_vtk']:
@@ -345,20 +342,54 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         if not self.flags['inverse']:
             E_elas = assemble(0.5*self.k(self.u_func, self.u_func))
             E_kin  = assemble(0.5*self.m(self.v_func, self.v_func))
+            E_visc = assemble(0.5*self.k(self.v_func, self.v_func))
             self.Energy_elastic = np.append(self.Energy_elastic, E_elas)
             self.Energy_kinetic = np.append(self.Energy_kinetic, E_kin)
 
             # viscous energy and norm of modes
-            E_visc = 0
+            # E_visc = 0
+
+            #self.modes   = self.coef_bk * self.modes + 0.5*h*self.coef_ck*self.F_old + 0.5*h*self.coef_ak*F_new
+            #self.history = ( self.wk * self.coef_bk * self.modes ).sum(dim=-1)
+
+      #      self.modes   = self.coef_bk * self.modes + 0.5*h*self.coef_ck*self.F_old + 0.5*h*self.coef_ak*F_new
+       #     self.history = ( self.wk * self.coef_bk * self.modes ).sum(dim=-1)
+        #    self.F_old   = 1.*F_new
+            
+
+            if len(self.kernels) == 2: 
+
+                kernel = self.kernels[0]
+                for i in range(kernel.nModes):
+                    mode = kernel.modes[:,i]
+                    self.mode_func.vector()[:] = mode.detach().numpy()
+                    E_visc += 0.5*kernel.wk[i] * assemble(self.c_tr(self.mode_func, self.mode_func))
+                
+                kernel = self.kernels[1]
+                for i in range(kernel.nModes):
+                    mode = kernel.modes[:,i]
+                    self.mode_func.vector()[:] = mode.detach().numpy()
+                    E_visc += 0.5*kernel.wk[i] * assemble(self.c_dev(self.mode_func, self.mode_func))
+            else: 
+                kernel = self.kernels[0]
+                for i in range(kernel.nModes):
+                    mode = kernel.modes[:,i]
+                    self.mode_func.vector()[:] = mode.detach().numpy()
+                    E_visc += 0.5*kernel.wk[i] * assemble(self.c_tr(self.mode_func, self.mode_func))
+                    E_visc += 0.5*kernel.wk[i] * assemble(self.c_dev(self.mode_func, self.mode_func))
+
             for kernel in self.kernels:
                 for i in range(kernel.nModes):
-
                     mode = kernel.modes[:,i]
                     self.mode_func.vector()[:] = mode.detach().numpy()
 
-                    self.modes_norm[step_index, i] = kernel.wk[i] * kernel.coef_bk[i] * np.sqrt(assemble(inner(self.mode_func, self.mode_func)*dx))
-                    E_visc += kernel.wk[i] * kernel.coef_bk[i] * assemble(0.5*self.c(self.mode_func, self.mode_func))
+         #           E_visc +=  
+                    # weights = kernel.weights
+                    # theta = kernel.theta
+                    # E_visc += weights[i] * (1-theta[i]) * (1-theta[i]) * assemble(0.5 * self.k(self.mode_func, self.mode_func))
 
+                    # self.modes_norm[step_index, i] = kernel.wk[i] * kernel.coef_bk[i] * np.sqrt(assemble(inner(self.mode_func, self.mode_func)*dx))
+                    
             self.Energy_viscous = np.append(self.Energy_viscous, E_visc)
             self.displacement_norm[step_index] = np.sqrt(assemble(inner(self.u_func, self.u_func)*dx))
             self.velocity_norm[step_index] = np.sqrt(assemble(inner(self.v_func, self.v_func)*dx))
@@ -394,13 +425,11 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         self.observations = torch.stack(self.observations)
         return self.observations
 
-
     """
     ==================================================================================================================
     Solver via Torch-FEniCS interface
     ==================================================================================================================
     """
-
     
     def solve_linear_system(self):
         un = self.u.reshape([1, -1, self.ndim])

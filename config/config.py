@@ -49,7 +49,7 @@ config = {
     'export_vtk'        :   False,
 
     'FinalTime'         :   5,
-    'nTimeSteps'        :   100,
+    'nTimeSteps'        :   200,
 
     'mesh'              :   mesh,
     'DirichletBoundary' :   DirichletBoundary,

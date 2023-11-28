@@ -148,6 +148,7 @@ for alpha in [0.05, 0.5, 0.75, 0.95]:
 
         #tikzplotlib.clean_figure(fig)
         tikzplotlib.save(tikz_folder+f"plt_ic_displacement_alpha{alpha}_"+timestamp+".tex", **tikz_settings)
+        plt.savefig(tikz_folder+f"plt_ic_displacement_alpha{alpha}_"+timestamp+".pdf")
         plt.close()
 
         fig = plt.figure('Tip displacement', **figure_settings)
@@ -170,4 +171,5 @@ for alpha in [0.05, 0.5, 0.75, 0.95]:
 
         tikz_settings['axis_width'] = '0.45*160mm'
         tikzplotlib.save(tikz_folder+f"plt_ic_modes_alpha{alpha}_"+timestamp+".tex", **tikz_settings)
+        plt.savefig(tikz_folder+f"plt_ic_modes_alpha{alpha}_"+timestamp+".pdf")
         plt.close()

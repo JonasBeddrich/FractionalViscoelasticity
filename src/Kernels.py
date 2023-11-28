@@ -143,6 +143,7 @@ class SumOfExponentialsKernel(AbstractKernel):
             self.h = h
         lmbda   = self.exponents
         theta   = lmbda / (1 + lmbda)
+        self.theta = theta 
         self.wk = self.weights * (1-theta)
         lgh     = lmbda*gamma*h
         den     = (1-theta)*(1 + lgh) + theta * h/2 * (1 + 2*lgh)
@@ -159,8 +160,6 @@ class SumOfExponentialsKernel(AbstractKernel):
         self.modes   = None
         self.history = 0
         
-
-
     def update_history(self, F):
         F_new = F.reshape([-1, 1])
 

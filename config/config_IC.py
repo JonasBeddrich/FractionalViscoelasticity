@@ -27,7 +27,8 @@ cutoff_time = 1.
 magnitude   = 1.
 tmax        = 4/5
 tzero       = 1.
-load_Bending = Expression(("0", "t <= tm ? p0*t/tm : (t <= tz ? p0*(1 - (t-tm)/(tz-tm)) : 0)", "0"), t=0, tm=tmax, tz=tzero, p0=magnitude, degree=0) ### Bending
+load_Bending = Expression(("0", "t <= tm ? p0*t/tm : (t <= tz ? p0*(1 - (t-tm)/(tz-tm)) : 0)", "0"), 
+                          t=0, tm=tmax, tz=tzero, p0=magnitude, degree=0) ### Bending
 
 config = {
     'verbose'           :   True,

@@ -22,7 +22,6 @@ Initial guess
 # config['initial_guess'] = [RA.c, RA.d]
 config['initial_guess'] = None
 
-
 """
 ==================================================================================================================
 Data to fit
@@ -83,7 +82,6 @@ plt.legend()
 plt.show()
 
 
-
 """
 ==================================================================================================================
 Forward run of initial guess
@@ -97,10 +95,9 @@ if fg_export:
     print("       RUN INITIAL GUESS")
     print("================================")
 
-
     if config_initial["two_kernels"]:
-        kernels = [SumOfExponentialsKernel(**config), SumOfExponentialsKernel(**config)] ### default kernels: alpha=0.5, 8 modes
-        parameters = [kernels[0].default_parameters(), kernels[0].default_parameters()]
+        kernels = [SumOfExponentialsKernel(**config), SumOfExponentialsKernel(**config)] 
+        parameters = [kernels[0].default_parameters(), kernels[1].default_parameters()]
     else:
         kernels = [SumOfExponentialsKernel(**config)]
         parameters = kernels[0].default_parameters()
@@ -143,7 +140,7 @@ print("       INVERSE PROBLEM")
 print("================================")
 
 if config["two_kernels"]:
-    kernels = [SumOfExponentialsKernel(**config), SumOfExponentialsKernel(**config)] ### default kernels: alpha=0.5, 8 modes
+    kernels = [SumOfExponentialsKernel(**config), SumOfExponentialsKernel(**config)]
 else:
     kernels = [SumOfExponentialsKernel(**config)]
 
@@ -153,14 +150,13 @@ if exclude_loading:
     objective = MSE(data=data, start=steps_per_unit)
 else:
     objective = MSE(data=data)
-IP        = InverseProblem(**config, plots=True)
+
+IP = InverseProblem(**config, plots=True)
 
 theta_opt = IP.calibrate(model, objective, **config)
 
 print("Optimal parameters :", theta_opt)
 print("Final loss         :", IP.loss)
-
-
 
 """
 ==================================================================================================================
@@ -199,7 +195,6 @@ if fg_export: ### write data to file
     save_data(config['outputfolder']+"model_predict_"+timestamp, model, other=[theta_opt, IP.convergence_history])
     np.savetxt(config['outputfolder']+"tip_displacement_predict_"+timestamp+".csv", pred)
 
-
 """
 ==================================================================================================================
 Display
@@ -222,12 +217,15 @@ with torch.no_grad():
         plt.title('Energies')
         plt.plot(model.time_steps, model.Energy_elastic, "o-", color='blue', label="Elastic energy")
         plt.plot(model.time_steps, model.Energy_kinetic, "o-", color='orange', label="Kinetic energy")
-        plt.plot(model.time_steps, model.Energy_elastic+model.Energy_kinetic, "o-", color='red', label="Total energy")
+        plt.plot(model.time_steps, model.Energy_viscous, "o-", color='green', label="Viscous energy")
+        plt.plot(model.time_steps, model.Energy_elastic+model.Energy_kinetic+model.Energy_viscous, "o-", color='red', label="Total energy")
         plt.grid(True, which='both')
         plt.legend()
 
     plt.show()
 
-    # model.kernel.plot()
+model.kernel.plot()
 
-
+for kernel in model.kernels: 
+    print(kernel.weights)
+    print(kernel.exponents)

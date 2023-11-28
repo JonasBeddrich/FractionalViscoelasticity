@@ -138,8 +138,15 @@ with torch.no_grad():
     if not Model.fg_inverse:
         plt.subplot(1,2,2)
         plt.title('Energies')
-        plt.plot(Model.time_steps, Model.Energy_elastic, "o-", color='blue', label="Elastic energy")
-        plt.plot(Model.time_steps, Model.Energy_kinetic, "o-", color='orange', label="Kinetic energy")
+        plt.plot(Model.time_steps, Model.Energy_elastic, 
+                 "o-", color='blue', label="Elastic energy")
+        plt.plot(Model.time_steps, Model.Energy_kinetic, 
+                 "o-", color='orange', label="Kinetic energy")
+        plt.plot(Model.time_steps, Model.Energy_viscous, 
+                 "o-", color='green', label="Viscous energy")
+        plt.plot(Model.time_steps, Model.Energy_elastic + Model.Energy_kinetic + Model.Energy_viscous, 
+                 "o-", color='red', label="Total energy")
+
         # plt.plot(Model.time_steps, Model.Energy_elastic+Model.Energy_kinetic, "o-", color='red', label="Total energy")
         plt.grid(True, which='both')
         plt.legend()

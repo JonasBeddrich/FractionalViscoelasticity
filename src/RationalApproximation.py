@@ -202,6 +202,9 @@ class RationalApproximation_AAA(BasicRationalApproximation):
         zer = scipy.linalg.eig(E,B, left=False, right=False)
         zer = zer[~np.isinf(zer)]
 
+        # print(pol)
+        # print(zer)
+
         ### Alternative method for zeros and poles
         # mask = np.arange(m)
         # P, Q = 0, 0
@@ -225,8 +228,6 @@ class RationalApproximation_AAA(BasicRationalApproximation):
         self.LeadingConst = np.sum(w*f) / np.sum(w)
         self.Zeros, self.Poles = zer.real, pol.real
         self.P, self.Q = np.poly(self.Zeros), np.poly(self.Poles)
-
-
 
     #------------------------------
 
@@ -383,8 +384,8 @@ class RationalApproximation_AAA(BasicRationalApproximation):
 if __name__ == "__main__":
 
     import sys
-    sys.path.append("/home/khristen/Projects/FDE/code/source/")
-    from MittagLeffler import ml
+    # sys.path.append("/home/khristen/Projects/FDE/code/source/")
+    # from MittagLeffler import ml
 
     alpha = 0.01
     nu = alpha
@@ -395,24 +396,27 @@ if __name__ == "__main__":
     nNodes = 100
     verbose = False
 
+    TargetFunction = lambda x: 0.5 * x**0.5 + 0.5 * x **0.4
+
     RA = RationalApproximation_AAA( alpha=alpha,
                                     tol=tol, nSupportPoints=nNodes,
                                     Zmin= Zmin, Zmax= Zmax,
-                                    verbose=verbose)
+                                    verbose=verbose, 
+                                    TargetFunction = TargetFunction)
     c, d = RA.c, RA.d
 
     x = np.geomspace(1.e-4, 1/dt, 1000)
 
-    plt.figure('Error')
-    y_r = [ RA.err(z) for z in 1/T + x]
-    y_c = [ RA.err(z) for z in 1/T + 1j*x]
-    plt.plot(x, y_r, label='real')
-    plt.plot(x, y_c,  '-', label='imag') 
-    plt.hlines(dt,x.min(),x.max(),color='gray',linestyle='--')
-    plt.hlines(dt**(1+nu),x.min(),x.max(),color='black',linestyle=':')
-    plt.yscale('log')
-    plt.xscale('log')
-    plt.legend()
+    # plt.figure('Error')
+    # y_r = [ RA.err(z) for z in 1/T + x]
+    # y_c = [ RA.err(z) for z in 1/T + 1j*x]
+    # plt.plot(x, y_r, label='real')
+    # plt.plot(x, y_c,  '-', label='imag') 
+    # plt.hlines(dt,x.min(),x.max(),color='gray',linestyle='--')
+    # plt.hlines(dt**(1+nu),x.min(),x.max(),color='black',linestyle=':')
+    # plt.yscale('log')
+    # plt.xscale('log')
+    # plt.legend()
 
     x = np.geomspace(dt, T, 10000)
     y_ex = np.array([ RA.func_ker(z) for z in x])
@@ -425,10 +429,10 @@ if __name__ == "__main__":
     plt.legend(['Ref', 'RA'])
     plt.ylim([0,None])
     plt.xscale('log')
+    plt.yscale('log')
 
-
-    plt.figure('Kernel error')
-    plt.plot(x,np.abs(y_ex-y_ra),'b-')
-    plt.xscale('log')
+    # plt.figure('Kernel error')
+    # plt.plot(x,np.abs(y_ex-y_ra),'b-')
+    # plt.xscale('log')
 
     plt.show()

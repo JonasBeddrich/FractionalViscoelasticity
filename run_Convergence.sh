@@ -6,7 +6,7 @@ export PYTHONPATH=.
 
 for ((i = 0 ; i <= $maxindex; i++)); do
     echo "Running n =" $i
-    mpirun -np 1 python script_Convergence.py config_Convergence $1 $alpha $i $maxindex&
+    mpirun -np 1 python3 script_Convergence.py config_Convergence $1 $alpha $i $maxindex&
 done
 
 wait
