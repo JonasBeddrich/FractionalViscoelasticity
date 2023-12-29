@@ -4,8 +4,6 @@ import torch
 from torch import nn
 from math import gamma
 
-
-
 """
 ==================================================================================================================
 Abstract kernel class (parent)
@@ -16,12 +14,10 @@ class AbstractKernel(nn.Module):
 
     def __init__(self, **kwargs):
         super().__init__()
-        parameters = kwargs.get("parameters", self.default_parameters(**kwargs)) ### list of the model parameters
+        # read kernel parameters - default empty list 
+        parameters = kwargs.get("parameters", []) 
         self._kernel_parameters = nn.Parameter(torch.zeros([len(parameters)], dtype=torch.float64))
         self.update_parameters(parameters)
-
-    def default_parameters(self, **kwargs):
-        return []
 
     def update_parameters(self, parameters=None):
         if parameters is not None:
@@ -161,20 +157,6 @@ class SumOfExponentialsKernel(AbstractKernel):
     def _eval_spectrum(self, z):
         c, d, c_inf = self.weights.detach().numpy(), self.exponents.detach().numpy(), self.exponents.detach().numpy()
         return np.sum(c / (z + d)) + c_inf
-
-
-
-
-
-    """
-    ==================================================================================================================
-    Jonas Evolution of the modes and the history integral
-    ==================================================================================================================
-    """
-
-    def 
-
-
 
 
     """

@@ -58,7 +58,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         rho = Constant(rho)
         self.rho = rho
 
-
         ### Mesh
         mesh = self.set_mesh(**kwargs)
 
@@ -170,7 +169,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
             boundary_subdomains.set_all(0)
             boundary_subdomain_Neumann = AutoSubDomain(NeumannBoundary)
             boundary_subdomain_Neumann.mark(boundary_subdomains, 1)
-            # self.ds_Neumann = ds(subdomain_data=boundary_subdomains)#, metadata={"quadrature_degree": 3})(1) # Define measure for boundary condition integral
             self.ds_Neumann = Measure("ds", domain=self.mesh, subdomain_data=boundary_subdomains)(1)#, metadata={"quadrature_degree": 3})(1) # Define measure for boundary condition integral
             self.NeumannBC = True
 
@@ -238,7 +236,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         else:
             torch.set_grad_enabled(False)
 
-        #TODO: write the output FEniCS function as dictionary "state"
         self.u_func = Function(self.V, name="displacement")
         self.v_func = Function(self.V, name="velocity")
         self.a_func = Function(self.V, name="acceleration")
@@ -288,13 +285,8 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
         self.v = vn + h * ( (1-gamma)*an + gamma*an1 )
         self.a = 1.*an1
 
-        # if self.DirichletBC: self.bc_u.apply(self.u.vector())
-
         if self.flags['viscosity']:
             self.history = [ kernel.update_history(self.v) for kernel in self.kernels ]
-
-            ### auxilary variable is not backpropagated, so the content is mutable
-            # self.w[:] = ( self.kernel.Weights * self.kernel.modes ).sum(dim=-1)
 
         ### Update FEniCS state functions (if needed)
         if (not self.flags['inverse']) or self.flags['export_vtk']:
@@ -302,9 +294,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
             self.v_func.vector()[:] = self.v.detach().numpy()
             self.a_func.vector()[:] = self.a.detach().numpy()
             self.p_func.vector()[:] = self.f_surf
-            # if self.flag['viscosity']:
-            #     self.w_func.vector()[:] = self.w.detach().numpy()
-            #     self.H_func.vector()[:] = self.history.detach().numpy()
 
     def export_state(self, time=0):
         if self.flags['export_vtk']:
@@ -336,8 +325,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
 
     def user_defined_routines(self, time=None, step_index=None):
 
-        ### TODO: your code here
-
         ### EXAMPLE: energies
         if not self.flags['inverse']:
             E_elas = assemble(0.5*self.k(self.u_func, self.u_func))
@@ -346,15 +333,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
             self.Energy_elastic = np.append(self.Energy_elastic, E_elas)
             self.Energy_kinetic = np.append(self.Energy_kinetic, E_kin)
 
-            # viscous energy and norm of modes
-            # E_visc = 0
-
-            #self.modes   = self.coef_bk * self.modes + 0.5*h*self.coef_ck*self.F_old + 0.5*h*self.coef_ak*F_new
-            #self.history = ( self.wk * self.coef_bk * self.modes ).sum(dim=-1)
-
-      #      self.modes   = self.coef_bk * self.modes + 0.5*h*self.coef_ck*self.F_old + 0.5*h*self.coef_ak*F_new
-       #     self.history = ( self.wk * self.coef_bk * self.modes ).sum(dim=-1)
-        #    self.F_old   = 1.*F_new
             
 
             if len(self.kernels) == 2: 
@@ -382,14 +360,7 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
                 for i in range(kernel.nModes):
                     mode = kernel.modes[:,i]
                     self.mode_func.vector()[:] = mode.detach().numpy()
-
-         #           E_visc +=  
-                    # weights = kernel.weights
-                    # theta = kernel.theta
-                    # E_visc += weights[i] * (1-theta[i]) * (1-theta[i]) * assemble(0.5 * self.k(self.mode_func, self.mode_func))
-
-                    # self.modes_norm[step_index, i] = kernel.wk[i] * kernel.coef_bk[i] * np.sqrt(assemble(inner(self.mode_func, self.mode_func)*dx))
-                    
+                 
             self.Energy_viscous = np.append(self.Energy_viscous, E_visc)
             self.displacement_norm[step_index] = np.sqrt(assemble(inner(self.u_func, self.u_func)*dx))
             self.velocity_norm[step_index] = np.sqrt(assemble(inner(self.v_func, self.v_func)*dx))
@@ -488,42 +459,6 @@ class ViscoelasticityProblem(torch_fenics.FEniCSModule):
 
         return a_new
 
-
-    def input_templates(self):
-        return (    Function(self.V), Function(self.V), Function(self.V),
-                    Function(self.V), Constant(0.), Constant(0.), 
-                    Function(self.V), Constant(0.), Constant(0.)    )
-
-
-    # """
-    # ==================================================================================================================
-    # Save and load the object
-    # ==================================================================================================================
-    # """
-
-    # def save(self, filename): ### filename = full/relative path w/o extension
-    #     if not filename.endswith('.pkl'):
-    #         filename = filename + '.pkl'
-
-    #     with open(filename, 'wb') as filehandler:
-    #         data = [self.observations, self.Energy_elastic, self.Energy_kinetic]
-    #         pickle.dump(data, filehandler)
-
-    #     if self.verbose:
-    #         print("Object data is saved to {0:s}".format(filename))
-
-
-    # def load(self, filename):
-    #     if not filename.endswith('.pkl'):
-    #         filename = filename + '.pkl'
-
-    #     with open(filename, 'rb') as filehandler:
-    #         data = pickle.load(filehandler)
-    #         self.observations, self.Energy_elastic, self.Energy_kinetic = data
-
-
-
-
 """
 ==================================================================================================================
 Newmark container
@@ -547,27 +482,7 @@ Default linear solver
 ==================================================================================================================
 """
 
-#def set_linSolver():
-#	solver = PETScLUSolver("mumps")
-#	# solver = dl.PETScKrylovSolver("bicgstab", "amg")
-#	# solver = dl.PETScKrylovSolver("gmres", "amg")
-#	# solver = PETScKrylovSolver("cg", "ilu")
-#	# solver = KrylovSolver("cg", "ilu")
-#	# solver = KrylovSolver("cg", "hypre_euclid")
-#	# solver.parameters["maximum_iterations"] = 1000
-#	# solver.parameters["relative_tolerance"] = 1.e-6
-#	# solver.parameters["absolute_tolerance"] = 1.e-6
-#	# solver.parameters["error_on_nonconvergence"] = True
-#	# solver.parameters["nonzero_initial_guess"] = False
-#	# solver.parameters["monitor_convergence"] = False
-#	return solver
-
 def set_linSolver():
-    # solver = dl.PETScLUSolver("mumps")
-    # solver = dl.PETScKrylovSolver("bicgstab", "amg")
-    # solver = dl.PETScKrylovSolver("gmres", "amg")
-    # solver = PETScKrylovSolver("cg", "ilu")
-
     # choose preconditioner depending on single-core/multiprocessing
     if MPI.COMM_WORLD.Get_size()==1:
         solver = KrylovSolver("cg", "ilu")
