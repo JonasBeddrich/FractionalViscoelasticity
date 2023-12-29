@@ -267,9 +267,6 @@ class InverseProblem:
     #        print("Weights:   ", weights.tolist())
     #        print("Exponents: ", exponents.tolist())
             
-
-
-
 """
 ==================================================================================================================
 Inverse problem using pyadjoint optimizer

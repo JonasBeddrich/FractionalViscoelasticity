@@ -15,7 +15,12 @@ import pandas as pd
 #                           TESTING
 ######################################################################
 
-def TargetFunction(x, alphas, weights):
+@np.vectorize
+def DistributedKernel(alpha): 
+    return gamma(6-alpha) / 120
+
+@np.vectorize
+def MultiTermKernel(x, alphas, weights):
     tmp = 0
     for (alpha, weight) in zip(alphas,weights): 
         tmp += weight * x ** (1-alpha)
@@ -23,16 +28,17 @@ def TargetFunction(x, alphas, weights):
 
 if __name__ == "__main__":
 
-    import sys
-    # sys.path.append("/home/khristen/Projects/FDE/code/source/")
-    # from MittagLeffler import ml
+    n = 10 
 
-    T  = 1
-    dt = 1.e-6
-    Zmin, Zmax = 1/T,1/dt
-    tol = 1.e-12
-    MaxDegree = 30
-    nSupportPoints=100
+
+
+
+    # T  = 1
+    # dt = 1.e-6
+    # Zmin, Zmax = 1/T,1/dt
+    # tol = 1.e-12
+    # MaxDegree = 30
+    # nSupportPoints=100
 
     # factor = 2
 
@@ -76,25 +82,25 @@ if __name__ == "__main__":
     # plt.show()
 
 
-    for alpha in np.linspace(0,1,6):
-        for beta in np.linspace(0,1,6):  
-            success = False 
-            alpha = np.round(alpha,5)
-            beta = np.round(beta,5)
-            for prefactor in [1,0.5,0.25,0.125]: 
-                TargetFunction = lambda x: prefactor * (x ** alpha + x ** beta)
-                try: 
-                    RA_alpha = RationalApproximation_AAA(alpha=alpha,
-                                                tol=tol, 
-                                                MaxDegree=MaxDegree, 
-                                                nSupportPoints=nSupportPoints,
-                                                Zmin= Zmin, 
-                                                Zmax= Zmax,
-                                                verbose=False, 
-                                                TargetFunction=TargetFunction)
-                    success = True
-                    break; 
-                except: 
-                    i = 1 # print()
-            # if not success: 
-            print(alpha, beta, success, prefactor)
+    # for alpha in np.linspace(0,1,6):
+    #     for beta in np.linspace(0,1,6):  
+    #         success = False 
+    #         alpha = np.round(alpha,5)
+    #         beta = np.round(beta,5)
+    #         for prefactor in [1,0.5,0.25,0.125]: 
+    #             TargetFunction = lambda x: prefactor * (x ** alpha + x ** beta)
+    #             try: 
+    #                 RA_alpha = RationalApproximation_AAA(alpha=alpha,
+    #                                             tol=tol, 
+    #                                             MaxDegree=MaxDegree, 
+    #                                             nSupportPoints=nSupportPoints,
+    #                                             Zmin= Zmin, 
+    #                                             Zmax= Zmax,
+    #                                             verbose=False, 
+    #                                             TargetFunction=TargetFunction)
+    #                 success = True
+    #                 break; 
+    #             except: 
+    #                 i = 1 # print()
+    #         # if not success: 
+    #         print(alpha, beta, success, prefactor)

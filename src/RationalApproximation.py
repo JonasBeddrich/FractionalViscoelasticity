@@ -171,6 +171,7 @@ class RationalApproximation_AAA(BasicRationalApproximation):
         C = np.array([]).reshape([M,0])
         errvec = np.array([])
         R = np.mean(F)*np.ones_like(F)
+
         for m in range(self.MaxDegree):
             j = np.argmax(np.abs(Wt @ (F-R)))
             J_opt = np.append(J_opt, j)
@@ -188,8 +189,13 @@ class RationalApproximation_AAA(BasicRationalApproximation):
             R[J] = N[J]/D[J]
             err = np.linalg.norm(Wt @ (F-R), ord=inf)
             errvec = np.append(errvec, err)
+            
+            self.z = z
+            
             if self.verbose: print(err)
-            if err <= self.tol: break
+            if err <= self.tol: 
+                break
+
         if self.verbose: print('degree',m)
         m = w.size
 
@@ -372,14 +378,13 @@ class RationalApproximation_AAA(BasicRationalApproximation):
         E1 = np.abs(E1)
         return E2
 
-
     #------------------------------
-
-
 
 ######################################################################
 #                           TESTING
 ######################################################################
+
+
 
 if __name__ == "__main__":
 
@@ -396,13 +401,13 @@ if __name__ == "__main__":
     nNodes = 100
     verbose = False
 
-    TargetFunction = lambda x: 0.5 * x**0.5 + 0.5 * x **0.4
+    # TargetFunction = lambda x: 0.5 * x**0.5 + 0.5 * x **0.4
 
     RA = RationalApproximation_AAA( alpha=alpha,
                                     tol=tol, nSupportPoints=nNodes,
                                     Zmin= Zmin, Zmax= Zmax,
-                                    verbose=verbose, 
-                                    TargetFunction = TargetFunction)
+                                    verbose=verbose)
+                                    # TargetFunction = TargetFunction)
     c, d = RA.c, RA.d
 
     x = np.geomspace(1.e-4, 1/dt, 1000)
@@ -429,7 +434,7 @@ if __name__ == "__main__":
     plt.legend(['Ref', 'RA'])
     plt.ylim([0,None])
     plt.xscale('log')
-    plt.yscale('log')
+    # plt.yscale('log')
 
     # plt.figure('Kernel error')
     # plt.plot(x,np.abs(y_ex-y_ra),'b-')

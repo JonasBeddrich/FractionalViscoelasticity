@@ -38,6 +38,39 @@ class AbstractKernel(nn.Module):
 
 """
 ==================================================================================================================
+Distributed kernel class
+==================================================================================================================
+"""
+
+class DistributedKernel(nn.Module): 
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.type = kwargs.get("Riemann-Liouville", True); 
+        
+
+        parameters = kwargs.get("parameters", self.default_parameters(**kwargs)) ### list of the model parameters
+        self._kernel_parameters = nn.Parameter(torch.zeros([len(parameters)], dtype=torch.float64))
+        self.update_parameters(parameters)
+
+    def default_parameters(self, **kwargs):
+        return []
+
+    def update_parameters(self, parameters=None):
+        if parameters is not None:
+            self._kernel_parameters.data[:] = parameters
+
+    @np.vectorize
+    def __call__(self, t):
+        return 0
+
+    @np.vectorize
+    def eval_spectrum(self, z):  
+        return 0
+ 
+
+"""
+==================================================================================================================
 Fractional kernel class
 ==================================================================================================================
 """
@@ -128,6 +161,20 @@ class SumOfExponentialsKernel(AbstractKernel):
     def _eval_spectrum(self, z):
         c, d, c_inf = self.weights.detach().numpy(), self.exponents.detach().numpy(), self.exponents.detach().numpy()
         return np.sum(c / (z + d)) + c_inf
+
+
+
+
+
+    """
+    ==================================================================================================================
+    Jonas Evolution of the modes and the history integral
+    ==================================================================================================================
+    """
+
+    def 
+
+
 
 
     """
