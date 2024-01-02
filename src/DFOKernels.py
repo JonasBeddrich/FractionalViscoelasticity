@@ -5,6 +5,7 @@ from math import gamma
 import matplotlib.pyplot as plt 
 
 from RationalApproximation import RationalApproximation_AAA
+
 """
 ==================================================================================================================
 MultiTermKernel for a interval 0 to 1 or 1 to 2
@@ -25,8 +26,10 @@ class MultiTermKernel:
     
     def eval_RATarget(self, t):
         return np.sum(self.phis * t ** (1 - self.alphas))
-    
 
+    def get_parameters(self): 
+        return alphas, phis 
+    
 """
 ==================================================================================================================
 Class to handle distributed fractional order kernels 
@@ -53,6 +56,8 @@ class DFOKernel(nn.Module):
         self.calculate_rational_approximations(**kwargs)
 
     def calculate_rational_approximations(self, **kwargs): 
+        
+        # parameters for the rational approximations 
         t_final = kwargs.get("t_final", 1)
         dt = kwargs.get("dt", 1e-6)
         Zmin, Zmax = 1/t_final, 1/dt 
@@ -60,11 +65,11 @@ class DFOKernel(nn.Module):
         maxDegree = kwargs.get("max_degree", 30)
         nSupportPoints = kwargs.get("nSupportPoints", 100)
 
+        # rational approximation of the multi term kernels 
         self.RA01 = RationalApproximation_AAA(alpha=0.5, tol=tol, MaxDegree=maxDegree, nSupportPoints=nSupportPoints, Zmin= Zmin, Zmax= Zmax, verbose=False, 
                                     TargetFunction=self.MTK01.RATarget)
         self.RA12 = RationalApproximation_AAA(alpha=0.5, tol=tol, MaxDegree=maxDegree, nSupportPoints=nSupportPoints, Zmin= Zmin, Zmax= Zmax, verbose=False, 
                                     TargetFunction=self.MTK12.RATarget)
-
     
     @classmethod
     def create_from_distribution(cls, *, distribution, **kwargs):
@@ -100,8 +105,6 @@ class DFOKernel(nn.Module):
         # call constructor 
         return cls(qpoints01, qpoints12, phis01, phis12, phi0, phi1, phi2)
     
-   
-
     # TODO 
     @classmethod
     def create_form_quadrature_rule(cls, qpoints, qvalues): 
@@ -125,19 +128,25 @@ class DFOKernel(nn.Module):
 
         return cls(qpoints01, qpoints12, phis01, phis12, phi0, phi1, phi2)
 
+    def get_parameters_RA01(self): 
+        return self.RA01.c, self.RA01.d, self.RA01.c_inf
+
+    def get_parameters_RA12(self): 
+        return self.RA12.c, self.RA12.d, self.RA12.c_inf
+
+    
 
 if __name__ == "__main__":
-    steve = DFOKernel.create_from_distribution(distribution = lambda x:(x-0.5)**3, support=(0.2,1.32), n_QP=20)
-   
-    # qpoints = np.linspace(0.5, 1.5, 20)
-    # qvalues = qpoints ** 2
-    # carsten = DFOKernel(qpoints=qpoints, qvalues=qvalues)
-    
+
+    steve = DFOKernel.create_from_distribution(distribution = lambda x:(x-0.5)**4, support=(0.2,1.32), n_QP=30)
+       
     for francis in [steve]: 
         plt.scatter(francis.alphas01, francis.phis01)
         plt.scatter(francis.alphas12, francis.phis12)     
-        plt.scatter(0, francis.phi0)
-        plt.scatter(1, francis.phi1)
-        plt.scatter(2, francis.phi2)
+        plt.scatter(0, francis.phi0, color ="black")
+        plt.scatter(1, francis.phi1, color ="black")
+        plt.scatter(2, francis.phi2, color ="black")
         plt.show()
-    
+
+    print(steve.get_parameters_RA01())
+    print(steve.get_parameters_RA12())
